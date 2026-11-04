@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Smart Pools · Piscinas de fibra de vidrio reforzado</title>
+  <meta name="description" content="Piscinas de fibra de vidrio reforzado fabricadas en una sola pieza e instaladas en días. Conoce los modelos, colores y cotiza la tuya.">
+  <meta name="theme-color" content="#0a3d5c">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="canonical" href="https://smartpools.cl/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:site_name" content="Smart Pools">
+  <meta property="og:title" content="Smart Pools · Tu piscina, más cerca de casa">
+  <meta property="og:description" content="Piscinas de fibra de vidrio reforzado fabricadas en una sola pieza e instaladas en días. Conoce los modelos y cotiza la tuya.">
+  <meta property="og:url" content="https://smartpools.cl/">
+  <meta property="og:image" content="https://smartpools.cl/assets/img/hero-surface.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="assets/img/hero-surface.jpg">
+  <link rel="stylesheet" href="css/styles.css?v=20261104e">
+</head>
+<body class="is-loading">
+  <a class="skip" href="#modelos">Ir al contenido</a>
+
+  <!-- ============ LOADER: el logo se llena de agua ============ -->
+  <div class="loader" aria-hidden="true">
+    <svg class="loader__word" viewBox="0 0 640 110">
+      <defs>
+        <clipPath id="loaderClip"><text x="320" y="80" text-anchor="middle">SMART POOLS</text></clipPath>
+      </defs>
+      <text class="loader__outline" x="320" y="80" text-anchor="middle">SMART POOLS</text>
+      <g clip-path="url(#loaderClip)">
+        <path class="loader__wave" d="M0 12 Q40 0 80 12 T160 12 T240 12 T320 12 T400 12 T480 12 T560 12 T640 12 T720 12 T800 12 T880 12 T960 12 T1040 12 T1120 12 T1200 12 T1280 12 V240 H0 Z"/>
+      </g>
+    </svg>
+    <div class="loader__meta"><span>Llenando la piscina</span><span class="loader__pct">0%</span></div>
+  </div>
+
+  <!-- cursor personalizado (solo con mouse) -->
+  <div class="cursor" aria-hidden="true"><span class="cursor__ring"></span></div>
+
+  <!-- medidor de profundidad = progreso del scroll -->
+  <div class="depth" aria-hidden="true">
+    <span class="depth__label">Profundidad</span>
+    <span class="depth__track"><span class="depth__fill"></span></span>
+    <span class="depth__value">0,00 m</span>
+  </div>
+
+  <!-- ============ NAVEGACIÓN ============ -->
+  <header class="nav">
+    <a class="nav__logo" href="#inicio" aria-label="Smart Pools, inicio"><b>SMART</b> POOLS</a>
+    <nav class="nav__links" aria-label="Principal">
+      <a href="#modelos">Modelos</a>
+      <a href="#fibra">Fibra Reforzada</a>
+      <a href="#inspiracion">Inspiración</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="btn btn--ghost nav__cta" href="#contacto">Cotiza tu piscina
+      <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+    <button class="nav__burger" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
+  </header>
+
+  <div class="menu" id="menu" aria-hidden="true">
+    <nav class="menu__links" aria-label="Menú móvil">
+      <a href="#modelos">Modelos</a>
+      <a href="#fibra">Fibra Reforzada</a>
+      <a href="#inspiracion">Inspiración</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="btn btn--light" href="#contacto">Cotiza tu piscina
+      <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+
+  <main>
+
+    <!-- ============ HERO: agua interactiva + inmersión con scroll ============ -->
+    <section class="hero" id="inicio">
+      <div class="hero__media">
+        <img class="hero__img" src="assets/img/hero-surface.jpg" alt="Piscina de fibra de vidrio frente a una casa moderna con jardín mediterráneo">
+        <canvas class="hero__gl" data-under="assets/img/underwater.jpg" aria-hidden="true"></canvas>
+        <div class="hero__shade"></div>
+        <canvas class="hero__bubbles" aria-hidden="true"></canvas>
+        <div class="hero__deep"></div>
+        <div class="hero__exit"></div>
+      </div>
+
+      <!-- sobre la superficie -->
+      <div class="hero__content">
+        <p class="eyebrow hero__eyebrow">Piscinas de fibra de vidrio reforzado</p>
+        <h1 class="hero__title">Tu piscina,<br>más cerca de casa</h1>
+        <a class="btn btn--cream hero__btn" href="#modelos">Ver modelos
+          <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <p class="hero__hint"><span class="hero__hint-dot"></span><span class="hero__hint-text">Pasa el cursor sobre el agua</span></p>
+
+      <div class="hero__cards">
+        <a class="gcard" href="#ventajas">
+          <span class="gcard__thumb"><img src="assets/img/thumb-1.jpg" alt=""></span>
+          <span class="gcard__title">Ventajas del<br>Fiberglass</span>
+          <svg class="i-arrow gcard__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="gcard" href="#modelos">
+          <span class="gcard__thumb"><img src="assets/img/thumb-2.jpg" alt=""></span>
+          <span class="gcard__title">Diseños<br>de Piscina</span>
+          <svg class="i-arrow gcard__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="gcard" href="#inspiracion">
+          <span class="gcard__thumb"><img src="assets/modelos/mancora-3-card.webp" alt=""></span>
+          <span class="gcard__title">Instalaciones<br>Reales</span>
+          <svg class="i-arrow gcard__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <!-- bajo el agua (aparece al terminar la inmersión) -->
+      <div class="under" id="sumergete">
+        <div class="under__intro">
+          <p class="eyebrow">Inmersión</p>
+          <h2 class="under__title">Desciende dentro<br>de la experiencia</h2>
+          <p class="under__text">Deja que el agua te guíe a un estado más tranquilo. Nuestras piscinas de fibra de vidrio están diseñadas para realzar cada momento, con un interior suave, resistente y pensado para durar.</p>
+        </div>
+        <div class="under__details">
+          <div class="under__head">
+            <div>
+              <p class="eyebrow">Bajo la superficie</p>
+              <h3 class="under__h3">Detalles que hacen la diferencia</h3>
+            </div>
+            <a class="under__link" href="#ventajas">Ver todas las características
+              <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+          <div class="under__cards">
+            <a class="dcard" href="#catalogo">
+              <img class="dcard__img" src="assets/img/detail-1.jpg" alt="">
+              <span class="dcard__eyebrow">Diseño funcional</span>
+              <span class="dcard__title">Escalones Integrados</span>
+              <span class="dcard__btn"><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="dcard" href="#fibra">
+              <img class="dcard__img" src="assets/img/detail-2.jpg" alt="">
+              <span class="dcard__eyebrow">Estética superior</span>
+              <span class="dcard__title">Interior Celeste</span>
+              <span class="dcard__btn"><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="dcard" href="#inspiracion">
+              <img class="dcard__img" src="assets/img/detail-3.jpg" alt="">
+              <span class="dcard__eyebrow">Calidad en cada detalle</span>
+              <span class="dcard__title">Detalles Reales</span>
+              <span class="dcard__btn"><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODELOS ============ -->
+    <!-- REEMPLAZAR: medidas, categorías y fotos del catálogo real -->
+    <section class="cat" id="modelos">
+      <div class="cat__bg" aria-hidden="true"></div>
+      <div class="wrap cat__top">
+        <div class="cat__intro">
+          <p class="cat__eyebrow">Nuestros modelos</p>
+          <h2 class="cat__h2"><span>Encuentra la piscina</span><span class="is-blue">ideal para tu espacio</span></h2>
+          <p class="cat__lead">Contamos con una amplia variedad de modelos y medidas, desde diseños compactos hasta formatos XL, todos en fibra de vidrio reforzado.</p>
+          <div class="chips" role="tablist" aria-label="Filtrar modelos">
+            <button class="chip is-active" type="button" data-filter="all">Todos</button>
+            <button class="chip" type="button" data-filter="compactas">Compactas</button>
+            <button class="chip" type="button" data-filter="familiares">Familiares</button>
+            <button class="chip" type="button" data-filter="xl">XL</button>
+            <button class="chip" type="button" data-filter="diseno">Con diseño</button>
+          </div>
+        </div>
+
+        <div class="feat">
+          <div class="feat__visual"><img class="feat__img" src="assets/modelos/los-roques-1-card.webp" alt="Piscina Los Roques" width="900" height="600"></div>
+          <div class="feat__info" aria-live="polite">
+            <p class="feat__name"><span class="feat__title">Los Roques</span><span class="badge feat__badge">Más vendido</span></p>
+            <p class="feat__desc">Diseño equilibrado, elegante y funcional.</p>
+            <div class="feat__specs"></div>
+            <p class="feat__price"></p>
+            <button class="btn btn--blue feat__cta" type="button">Ver modelo
+              <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <div class="feat__dots" role="tablist" aria-label="Modelo destacado"></div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="wrap perks">
+        <li><span class="perk__icon"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 18M15 3l-3 18M6 3l3 6M18 3l-3 6"/></svg></span><span>Variedad<br>de modelos</span></li>
+        <li><span class="perk__icon"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="13" height="13" rx="2"/><path d="M16 21H5a2 2 0 0 1-2-2V8"/></svg></span><span>Terminación<br>gelcoat estándar</span></li>
+        <li><span class="perk__icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.8"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5M15 14.6c2.9-.3 5.6 1.2 6.4 4.4"/></svg></span><span>Asesoría<br>personalizada</span></li>
+        <li><span class="perk__icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span><span>Instalación<br>profesional</span></li>
+      </ul>
+
+      <div class="wrap cat__listhead">
+        <div>
+          <p class="cat__eyebrow">Nuestros modelos destacados</p>
+          <h2 class="cat__h2 cat__h2--sm">Diseños pensados para <span class="is-blue">cada proyecto</span></h2>
+        </div>
+        <a class="btn btn--outline cat__all" href="#catalogo"><span>Ver los <b class="cat__all-n">17</b> modelos</span>
+          <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <div class="cat__grid" id="catalogo"></div>
+      <p class="cat__empty" hidden>Estamos preparando nuevos modelos en esta categoría. <a href="#contacto">Escríbenos</a> y te asesoramos.</p>
+    </section>
+
+    <!-- ============ VENTAJAS: scroll horizontal ============ -->
+    <section class="adv" id="ventajas">
+      <div class="adv__pin">
+        <header class="wrap adv__head">
+          <div>
+            <p class="eyebrow eyebrow--pool">Ventajas del fiberglass</p>
+            <h2 class="h2">Por qué elegir <em>fibra de vidrio</em></h2>
+          </div>
+          <div class="adv__progress" aria-hidden="true"><span></span></div>
+        </header>
+
+        <div class="adv__viewport">
+          <div class="adv__track">
+            <article class="adv__card">
+              <span class="adv__idx">01</span>
+              <svg class="adv__icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="34" r="22"/><path d="M32 20v14l9 6"/><path d="M26 6h12M32 6v6"/></svg>
+              <h3>Instalada en días, no en meses</h3>
+              <p>Llega fabricada en una sola pieza. La obra en tu casa se reduce a excavar, nivelar e instalar: menos polvo, menos ruido y menos tiempo con el patio en obra.</p>
+            </article>
+            <article class="adv__card">
+              <span class="adv__idx">02</span>
+              <svg class="adv__icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 34h10l5-14 7 28 7-22 6 16 5-8h16"/><path d="M8 54h48"/></svg>
+              <h3>Flexible ante los sismos</h3>
+              <p>El compuesto de fibra y resina acompaña los movimientos del terreno en vez de agrietarse como un material rígido. Una ventaja real en un país sísmico como Chile.</p>
+            </article>
+            <article class="adv__card">
+              <span class="adv__idx">03</span>
+              <svg class="adv__icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6C22 20 16 29 16 38a16 16 0 0 0 32 0c0-9-6-18-16-32z"/><path d="M24 40a8 8 0 0 0 8 8"/></svg>
+              <h3>Suave al tacto</h3>
+              <p>El gelcoat deja una terminación lisa y no porosa: nada de raspones en pies y manos, y ningún poro donde se adhieran las algas.</p>
+            </article>
+            <article class="adv__card">
+              <span class="adv__idx">04</span>
+              <svg class="adv__icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 10h24l-3 12H23z"/><path d="M23 22l-5 32h28l-5-32"/><path d="M26 38h12"/></svg>
+              <h3>Menos químicos y mantención</h3>
+              <p>Una superficie que no absorbe suciedad necesita menos cloro y menos cepillado. Más tardes nadando y menos fines de semana limpiando.</p>
+            </article>
+            <article class="adv__card">
+              <span class="adv__idx">05</span>
+              <svg class="adv__icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6l22 8v16c0 14-9 23-22 28C19 53 10 44 10 30V14z"/><path d="M22 32l7 7 13-14"/></svg>
+              <h3>Hecha para durar</h3>
+              <p>Resiste la corrosión, la radiación UV y los cambios de temperatura. Sin baldosas que se suelten ni pintura que renovar cada temporada.</p>
+            </article>
+            <a class="adv__card adv__card--cta" href="#modelos">
+              <span class="adv__cta-bg"><img src="assets/modelos/praia-2-card.webp" alt="" loading="lazy"></span>
+              <span class="adv__cta-text">¿Lista tu primera temporada?</span>
+              <span class="btn btn--light">Ver modelos
+                <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FIBRA REFORZADA: anatomía en capas ============ -->
+    <!-- REEMPLAZAR: ajustar las capas al proceso real de fabricación de Smart Pools -->
+    <section class="layers" id="fibra">
+      <div class="layers__pin">
+        <div class="layers__copy">
+          <p class="eyebrow eyebrow--aqua">Fibra reforzada</p>
+          <h2 class="h2 h2--light">Cinco capas,<br><em>una sola pieza</em></h2>
+          <p class="layers__lead">Cada piscina se lamina capa a capa sobre un molde. El resultado es un casco continuo, sin uniones, que combina rigidez y flexibilidad.</p>
+          <ol class="layers__list">
+            <li><b>Gelcoat de terminación</b><span>La capa que tocas. Lisa, brillante y con protección UV para que el color dure.</span></li>
+            <li><b>Barrera de viniléster</b><span>Bloquea la osmosis y protege la estructura del agua y de los químicos.</span></li>
+            <li><b>Fibra de vidrio laminada</b><span>Mantas de fibra impregnadas en resina, una sobre otra, que dan la resistencia.</span></li>
+            <li><b>Núcleo estructural</b><span>Aporta rigidez sin perder la flexibilidad frente a los movimientos del suelo.</span></li>
+            <li><b>Refuerzo exterior</b><span>Costillas y resina final que sellan la pieza y resisten la presión del terreno.</span></li>
+          </ol>
+        </div>
+        <div class="layers__stage" aria-hidden="true">
+          <div class="layers__scene">
+            <div class="layers__stack">
+              <div class="layer layer--water"></div>
+              <div class="layer layer--gel"></div>
+              <div class="layer layer--barrier"></div>
+              <div class="layer layer--fiber"></div>
+              <div class="layer layer--core"></div>
+              <div class="layer layer--shell"></div>
+            </div>
+          </div>
+          <p class="layers__counter"><span class="layers__counter-now">01</span> / 05</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PROCESO: línea de agua que se dibuja ============ -->
+    <section class="process" id="proceso">
+      <header class="wrap process__head">
+        <p class="eyebrow eyebrow--pool">Cómo trabajamos</p>
+        <h2 class="h2">Del primer boceto<br>al <em>primer chapuzón</em></h2>
+      </header>
+      <div class="wrap process__wrap">
+        <svg class="process__line" aria-hidden="true"><path class="process__path-bg"/><path class="process__path"/><circle class="process__drop" r="7"/></svg>
+        <ol class="process__steps">
+          <li class="step"><span class="step__n">01</span><div><h3>Visita y cotización</h3><p>Conversamos sobre tu espacio, medimos el terreno y te enviamos una propuesta clara, sin letra chica.</p></div></li>
+          <li class="step"><span class="step__n">02</span><div><h3>Eliges modelo y color</h3><p>Te ayudamos a escoger la forma, el tamaño y el gelcoat que mejor conversan con tu jardín.</p></div></li>
+          <li class="step"><span class="step__n">03</span><div><h3>Excavación y base</h3><p>Preparamos el terreno, nivelamos y construimos una base firme y compactada.</p></div></li>
+          <li class="step"><span class="step__n">04</span><div><h3>Instalación de la piscina</h3><p>La piscina llega en una sola pieza, se posiciona con grúa y se nivela con precisión.</p></div></li>
+          <li class="step"><span class="step__n">05</span><div><h3>Llenado y entrega</h3><p>Conectamos la filtración, llenamos y te enseñamos todo lo necesario. Solo queda lanzarse.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ CONFIANZA: garantía + testimonios ============ -->
+    <!-- Cifras tomadas de las fichas técnicas. REEMPLAZAR: testimonios de clientes verdaderos (con su permiso) -->
+    <section class="trust" id="garantia">
+      <div class="wrap">
+        <header class="trust__head">
+          <p class="eyebrow eyebrow--aqua">Garantía y respaldo</p>
+          <h2 class="h2 h2--light">Más de mil patios <em>ya se lanzaron</em></h2>
+        </header>
+        <div class="trust__pillars">
+          <article class="pillar">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l16 6v12c0 10-7 17-16 21C15 39 8 32 8 22V10z"/><path d="M17 24l5 5 9-10"/></svg>
+            <p class="pillar__num"><span data-count="3">3</span><small>años</small></p>
+            <h3>Garantía legal</h3>
+            <p>Respaldo sobre el casco de fibra de vidrio y los equipos suministrados.</p>
+          </article>
+          <article class="pillar">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40h32M12 40V20l12-10 12 10v20"/><path d="M20 40v-9h8v9"/></svg>
+            <p class="pillar__num"><span data-count="48">48</span><small>horas</small></p>
+            <h3>Tu piscina lista</h3>
+            <p>Desde que llega al patio hasta la puesta en marcha: instalada, conectada y funcionando.</p>
+          </article>
+          <article class="pillar">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M24 14v10l6 4"/></svg>
+            <p class="pillar__num"><small>+</small><span data-count="1000">1000</span></p>
+            <h3>Piscinas entregadas</h3>
+            <p>Más de mil familias en Chile ya disfrutan una Smart Pools.</p>
+          </article>
+        </div>
+
+        <div class="reviews">
+          <article class="review">
+            <div class="review__stars" aria-label="5 de 5 estrellas">★★★★★</div>
+            <p class="review__text">Cotizamos en octubre y en noviembre ya estábamos nadando. La instalación fue mucho más limpia y rápida de lo que pensábamos.</p>
+            <p class="review__who"><b>Carolina y Andrés</b><span>Los Roques · Litueche</span></p>
+          </article>
+          <article class="review">
+            <div class="review__stars" aria-label="5 de 5 estrellas">★★★★★</div>
+            <p class="review__text">Tenía un patio chico y pensé que no cabía nada. Me ayudaron a elegir el modelo correcto y hoy es el lugar favorito de la casa.</p>
+            <p class="review__who"><b>Javiera M.</b><span>Dubai · Buin</span></p>
+          </article>
+          <article class="review">
+            <div class="review__stars" aria-label="5 de 5 estrellas">★★★★★</div>
+            <p class="review__text">Lo que más valoro es la mantención: con la superficie lisa casi no uso químicos y el agua se mantiene impecable.</p>
+            <p class="review__who"><b>Rodrigo P.</b><span>Praia · Machalí</span></p>
+          </article>
+        </div>
+        <p class="trust__note">Testimonios ilustrativos. Serán reemplazados por opiniones reales de clientes de Smart Pools.</p>
+      </div>
+    </section>
+
+    <!-- ============ INSPIRACIÓN: galería con parallax ============ -->
+    <section class="gallery" id="inspiracion">
+      <header class="wrap gallery__head">
+        <p class="eyebrow eyebrow--pool">Inspiración</p>
+        <h2 class="h2">Patios que ya <em>no son los mismos</em></h2>
+      </header>
+      <div class="gallery__cols">
+        <div class="gallery__col" data-speed="-8">
+          <figure class="shot shot--tall"><img src="assets/modelos/floripa-3-card.webp" alt="Piscina Floripa con deck de madera" loading="lazy"><figcaption>Floripa · deck de madera</figcaption></figure>
+          <figure class="shot"><img src="assets/modelos/santorini-2-card.webp" alt="Piscina Santorini junto a la terraza" loading="lazy"><figcaption>Santorini · terraza</figcaption></figure>
+          <figure class="shot"><img src="assets/modelos/mancora-4-card.webp" alt="Piscina Mancora al atardecer" loading="lazy"><figcaption>Mancora · atardecer</figcaption></figure>
+        </div>
+        <div class="gallery__col" data-speed="10">
+          <figure class="shot"><img src="assets/modelos/dubai-1-card.webp" alt="Piscina Dubai con spa circular" loading="lazy"><figcaption>Dubai · piscina con spa</figcaption></figure>
+          <figure class="shot shot--tall"><img src="assets/modelos/praia-1-card.webp" alt="Piscina Praia en un jardín amplio" loading="lazy"><figcaption>Praia · nado largo</figcaption></figure>
+          <figure class="shot"><img src="assets/modelos/ibiza-3-card.webp" alt="Spa octogonal Ibiza con deck" loading="lazy"><figcaption>Ibiza · spa con deck</figcaption></figure>
+        </div>
+        <div class="gallery__col" data-speed="-4">
+          <figure class="shot"><img src="assets/modelos/rio-3-card.webp" alt="Piscina Rio con borde de madera" loading="lazy"><figcaption>Rio · patio urbano</figcaption></figure>
+          <figure class="shot"><img src="assets/modelos/camboriu-3-card.webp" alt="Piscina compacta Camboriu" loading="lazy"><figcaption>Camboriu · patio pequeño</figcaption></figure>
+          <figure class="shot shot--tall"><img src="assets/modelos/los-roques-2-card.webp" alt="Piscina Los Roques en un jardín" loading="lazy"><figcaption>Los Roques · la más vendida</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PREGUNTAS FRECUENTES ============ -->
+    <section class="faq" id="preguntas">
+      <div class="wrap faq__grid">
+        <header class="faq__head">
+          <p class="eyebrow eyebrow--pool">Preguntas frecuentes</p>
+          <h2 class="h2">Lo que todos <em>preguntan antes</em></h2>
+          <p class="faq__lead">¿Tienes otra duda? Escríbenos por WhatsApp y te respondemos en el día.</p>
+          <a class="btn btn--dark faq__cta" href="#contacto">Hacer una consulta
+            <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </header>
+        <div class="faq__list">
+          <details class="qa" open>
+            <summary><span>¿Cuánto demora instalar una piscina de fibra de vidrio?</span><i></i></summary>
+            <div class="qa__body"><p>Tu piscina queda lista en 48 horas desde que llega al patio. Viene fabricada en una sola pieza: se excava con retroexcavadora, se prepara la cama de nivelación, se instala, se conecta y se pone en marcha.</p></div>
+          </details>
+          <details class="qa">
+            <summary><span>¿Necesito permiso municipal?</span><i></i></summary>
+            <div class="qa__body"><p>En la mayoría de las comunas una piscina residencial requiere un permiso de obra menor. Te entregamos los planos y la documentación técnica para presentarla y te orientamos en el trámite.</p></div>
+          </details>
+          <details class="qa">
+            <summary><span>¿Resiste los sismos?</span><i></i></summary>
+            <div class="qa__body"><p>Sí. La fibra de vidrio es un material flexible que acompaña los movimientos del terreno en vez de agrietarse, a diferencia del hormigón. Es una de las razones por las que funciona tan bien en Chile.</p></div>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué incluye la instalación?</span><i></i></summary>
+            <div class="qa__body"><p>El Proyecto Estándar incluye el casco con 1 foco, 1 skimmer, 2 retornos y 1 drenaje, bomba de 0,75 HP según modelo, equipo de filtrado con cuarzo filtrante, tablero eléctrico, excavación con retroexcavadora, cama de nivelación, fittinería completa, instalación, conexionado y puesta en marcha. El Proyecto Con Bordes suma el borde perimetral en Fulget, Pastelón o Deck de pino impregnado, y el Climatizado agrega una bomba de calor inverter.</p></div>
+          </details>
+          <details class="qa">
+            <summary><span>¿Cuánta mantención necesita?</span><i></i></summary>
+            <div class="qa__body"><p>Menos que una piscina tradicional. La superficie no porosa evita que se adhieran algas, así que usarás menos químicos y menos cepillado. Basta con mantener la filtración y revisar el agua cada semana.</p></div>
+          </details>
+          <details class="qa">
+            <summary><span>¿Cabe en mi patio?</span><i></i></summary>
+            <div class="qa__body"><p>Tenemos modelos desde 2,5 × 2,5 m (Ibiza) hasta 12 × 4 m (Praia), en tamaños S, M, L y XL. En la inspección medimos el espacio y los accesos, y te recomendamos el modelo que mejor aprovecha tu terreno.</p></div>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué no incluye el precio?</span><i></i></summary>
+            <div class="qa__body"><p>Los valores son "desde", incluyen IVA de los productos suministrados y se confirman con una inspección digital de tu terreno. El transporte se cotiza según la ubicación exacta, y no se incluye el retiro de escombros, el agua ni el relleno adicional.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Fibra de vidrio reforzado</span><i></i><span>Instalada en días</span><i></i><span>Una sola pieza</span><i></i><span>Hecha para Chile</span><i></i>
+        <span>Fibra de vidrio reforzado</span><i></i><span>Instalada en días</span><i></i><span>Una sola pieza</span><i></i><span>Hecha para Chile</span><i></i>
+      </div>
+    </div>
+
+    <!-- ============ CONTACTO ============ -->
+    <section class="contact" id="contacto">
+      <div class="contact__bg"><img src="assets/modelos/mancora-4-full.webp" alt="" loading="lazy"></div>
+      <div class="wrap contact__grid">
+        <div class="contact__copy">
+          <p class="eyebrow eyebrow--aqua">Contacto</p>
+          <h2 class="h2 h2--light">Cotiza tu piscina<br><em>este verano</em></h2>
+          <p class="contact__lead">Cuéntanos sobre tu patio y te respondemos con una propuesta a tu medida.</p>
+          <ul class="contact__data">
+            <li><span>Teléfono</span><a href="tel:+56953129916">+56 9 5312 9916</a></li>
+            <li><span>Correo</span><a href="mailto:contacto@smartpools.cl">contacto@smartpools.cl</a></li>
+            <li><span>Oficina</span><a href="https://maps.app.goo.gl/DZJdVQGCZoHJM8gQA" target="_blank" rel="noopener">Gral. Las Heras 1610, oficina 802, Santiago</a></li>
+            <li><span>WhatsApp</span><a class="wa-link" href="https://wa.me/56953129916" target="_blank" rel="noopener">+56 9 5312 9916</a></li>
+          </ul>
+          <a class="btn btn--wa contact__wa" href="https://wa.me/56953129916" target="_blank" rel="noopener">
+            <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1a12.9 12.9 0 0 0 6.1 1.5c7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.2 1.3-3.9-.3-.4a10.3 10.3 0 0 1-1.7-5.7C5.4 10 10.2 5.3 16 5.3S26.6 10 26.6 15.6 21.8 26.1 16 26.1zm5.8-7.7c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.6.1-.2 0-.4 0-.6l-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.9 5.1 2.2.9 3 1 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
+            Escribir por WhatsApp
+          </a>
+        </div>
+
+        <!-- Envío: ver CONFIG.formEndpoint en js/main.js. Sin endpoint, abre WhatsApp con el mensaje armado -->
+        <form class="form" novalidate>
+          <input class="form__hp" type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="form__row">
+            <label class="field"><span>Nombre</span><input name="nombre" type="text" autocomplete="name" required></label>
+            <label class="field"><span>Teléfono</span><input name="telefono" type="tel" autocomplete="tel" required></label>
+          </div>
+          <label class="field"><span>Correo</span><input name="correo" type="email" autocomplete="email" required></label>
+          <div class="form__row">
+            <label class="field"><span>Comuna</span><input name="comuna" type="text" autocomplete="address-level2"></label>
+            <label class="field"><span>Modelo de interés</span>
+              <select name="modelo" class="form__model">
+                <option value="">Aún no lo sé</option>
+              </select>
+            </label>
+          </div>
+          <label class="field"><span>Cuéntanos de tu proyecto</span><textarea name="mensaje" rows="3"></textarea></label>
+          <label class="check"><input type="checkbox" name="acepta" required><span>Acepto que Smart Pools use mis datos para responder esta solicitud, según su <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</span></label>
+          <button class="btn btn--light form__submit" type="submit">Enviar solicitud
+            <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <div class="form__done" aria-live="polite">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28"/><path d="M20 33l8 8 16-17"/></svg>
+            <p><b>¡Gracias!</b> <span class="form__done-msg">Te contactaremos muy pronto.</span></p>
+            <button class="form__again" type="button">Enviar otra solicitud</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <svg class="footer__word" viewBox="0 0 1200 170" aria-hidden="true">
+      <defs>
+        <clipPath id="footClip"><text x="600" y="140" text-anchor="middle">SMART POOLS</text></clipPath>
+      </defs>
+      <text class="footer__outline" x="600" y="140" text-anchor="middle">SMART POOLS</text>
+      <g clip-path="url(#footClip)">
+        <path class="footer__wave" d="M0 20 Q50 4 100 20 T200 20 T300 20 T400 20 T500 20 T600 20 T700 20 T800 20 T900 20 T1000 20 T1100 20 T1200 20 T1300 20 T1400 20 T1500 20 T1600 20 T1700 20 T1800 20 T1900 20 T2000 20 T2100 20 T2200 20 T2300 20 T2400 20 V400 H0 Z"/>
+      </g>
+    </svg>
+    <div class="wrap footer__row">
+      <p>Contiene tus mejores momentos</p>
+      <nav aria-label="Pie de página"><a href="#modelos">Modelos</a><a href="#fibra">Fibra Reforzada</a><a href="#proceso">Proceso</a><a href="#inspiracion">Inspiración</a><a href="#preguntas">Preguntas</a><a href="#contacto">Contacto</a><a href="privacidad.html">Privacidad</a></nav>
+      <p>© 2026 Smart Pools · <a href="https://maps.app.goo.gl/DZJdVQGCZoHJM8gQA" target="_blank" rel="noopener">Gral. Las Heras 1610, oficina 802, Santiago</a></p>
+    </div>
+  </footer>
+
+  <!-- botón flotante de WhatsApp -->
+  <a class="wa" href="https://wa.me/56953129916" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1a12.9 12.9 0 0 0 6.1 1.5c7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.2 1.3-3.9-.3-.4a10.3 10.3 0 0 1-1.7-5.7C5.4 10 10.2 5.3 16 5.3S26.6 10 26.6 15.6 21.8 26.1 16 26.1zm5.8-7.7c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.6.1-.2 0-.4 0-.6l-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.9 5.1 2.2.9 3 1 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
+    <span class="wa__tip">¿Hablamos? Respondemos en el día</span>
+  </a>
+
+  <!-- ficha de modelo -->
+  <div class="modal" id="modelo-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card">
+      <button class="modal__close" type="button" data-close aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="modal__media">
+        <img class="modal__img" src="" alt="">
+        <span class="modal__badge badge" hidden></span>
+        <div class="modal__thumbs" aria-label="Fotos del modelo"></div>
+      </div>
+      <div class="modal__body">
+        <p class="modal__eyebrow"></p>
+        <h3 class="modal__title" id="modal-title"></h3>
+        <p class="modal__desc"></p>
+        <div class="modal__specs"></div>
+        <ul class="modal__features"></ul>
+        <div class="modal__tiers">
+          <div class="modal__tier"><span>Proyecto Estándar</span><small>Piscina, equipos, excavación e instalación</small><b></b></div>
+          <div class="modal__tier is-top"><i>El más vendido</i><span>Proyecto Con Bordes</span><small>+ borde perimetral en Fulget, Pastelón o Deck de pino impregnado</small><b></b></div>
+          <div class="modal__tier"><span>Proyecto Climatizado</span><small>+ bomba de calor inverter eficiente</small><b></b></div>
+        </div>
+        <p class="modal__note">Valores "desde", con IVA, a confirmar con inspección digital. Transporte según ubicación. No incluye retiro de escombros, agua ni relleno adicional.</p>
+        <div class="modal__actions">
+          <a class="btn btn--blue modal__quote" href="#contacto">Cotizar este modelo
+            <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn--wa modal__wa" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1a12.9 12.9 0 0 0 6.1 1.5c7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.2 1.3-3.9-.3-.4a10.3 10.3 0 0 1-1.7-5.7C5.4 10 10.2 5.3 16 5.3S26.6 10 26.6 15.6 21.8 26.1 16 26.1zm5.8-7.7c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.6.1-.2 0-.4 0-.6l-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.9 5.1 2.2.9 3 1 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
+            Preguntar por WhatsApp
+          </a>
+        </div>
+        <div class="modal__nav">
+          <button class="modal__prev" type="button" aria-label="Modelo anterior"><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span></span></button>
+          <button class="modal__next" type="button" aria-label="Modelo siguiente"><span></span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="js/water.js?v=20261104e"></script>
+  <script src="js/main.js?v=20261104e"></script>
+</body>
+</html>
