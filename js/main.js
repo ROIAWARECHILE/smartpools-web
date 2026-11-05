@@ -667,6 +667,12 @@
       });
       if (!window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
 
+      ScrollTrigger.create({
+        trigger: '.cat', start: 'top top',
+        onEnter: function () { heroEl.classList.add('is-covered'); if (!vid.paused) vid.pause(); },
+        onLeaveBack: function () { heroEl.classList.remove('is-covered'); if (descended && !vid.ended) { var pr2 = vid.play(); if (pr2 && pr2.catch) pr2.catch(function () {}); } }
+      });
+
       /* ---- SALIDA DEL AGUA: "Nuestros modelos" sube sobre el fondo de la piscina ---- */
       gsap.timeline({
         defaults: { ease: 'none' },
@@ -815,13 +821,26 @@
       gsap.from('.qa', { autoAlpha: 0, y: 30, duration: 0.8, stagger: 0.07, scrollTrigger: { trigger: '.faq__list', start: 'top 85%' } });
     });
 
-    /* ---- PROCESO: la línea de agua se dibuja ---- */
+    /* ---- PROCESO: del sol al agua. El boceto a lápiz se vuelve agua, una gota recorre el camino y llena la piscina ---- */
     var pwrap = q('.process__wrap');
     var psvg = q('.process__line');
-    var path = q('.process__path'), pathBg = q('.process__path-bg'), drop = q('.process__drop');
+    var path = q('.process__path'), pathBg = q('.process__path-bg'), pathFlow = q('.process__path-flow');
+    var dropG = q('.process__drop'), flowClip = q('.process__flowclip'), waterClip = q('.process__waterclip');
+    var sunG = q('.process__sun'), raysG = q('.process__rays'), poolG = q('.process__pool');
+    var poolRim = q('.process__pool-rim'), poolWater = q('.process__pool-water'), poolLabel = q('.process__pool-label');
+    var steps = qa('.step');
+    var PAD_BOTTOM = 170, poolTop = 0, poolH = 0;
+    var ns = 'http://www.w3.org/2000/svg';
+    for (var r = 0; r < 8; r++) {
+      var ln = document.createElementNS(ns, 'line');
+      ln.setAttribute('x1', 0); ln.setAttribute('y1', -19); ln.setAttribute('x2', 0); ln.setAttribute('y2', -25);
+      ln.setAttribute('transform', 'rotate(' + r * 45 + ')');
+      raysG.appendChild(ln);
+    }
     function buildPath() {
-      var h = pwrap.offsetHeight;
       var mobile = window.innerWidth <= 760;
+      PAD_BOTTOM = mobile ? 150 : 170;
+      var h = pwrap.offsetHeight - PAD_BOTTOM;
       var w = mobile ? 48 : 160, cx = w / 2, amp = mobile ? 14 : 60, seg = 6, sh = h / seg;
       var d = 'M' + cx + ' 0';
       for (var i = 0; i < seg; i++) {
@@ -830,21 +849,56 @@
       }
       psvg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
       psvg.style.height = h + 'px';
-      path.setAttribute('d', d); pathBg.setAttribute('d', d);
-      drop.setAttribute('cx', cx); drop.setAttribute('cy', 0);
+      path.setAttribute('d', d); pathBg.setAttribute('d', d); pathFlow.setAttribute('d', d);
+      q('#process-grad').setAttribute('y2', h);
+      flowClip.setAttribute('width', w + 400);
+      sunG.setAttribute('transform', 'translate(' + cx + ' ' + (-34) + ')');
+      var pw = mobile ? 44 : 84; poolH = mobile ? 22 : 36; poolTop = h + 22;
+      poolG.setAttribute('transform', 'translate(0 0)');
+      poolRim.setAttribute('x', cx - pw / 2); poolRim.setAttribute('y', poolTop); poolRim.setAttribute('width', pw); poolRim.setAttribute('height', poolH);
+      poolWater.setAttribute('x', cx - pw / 2 + 3); poolWater.setAttribute('y', poolTop + 3); poolWater.setAttribute('width', pw - 6); poolWater.setAttribute('height', poolH - 6);
+      waterClip.setAttribute('width', w + 400); waterClip.setAttribute('y', poolTop + poolH); waterClip.setAttribute('height', 0);
+      poolLabel.setAttribute('x', cx); poolLabel.setAttribute('y', poolTop + poolH + 34);
+      qa('.process__splash circle').forEach(function (c, k) { c.setAttribute('cx', cx + (k - 1) * 14); c.setAttribute('cy', poolTop + 2); });
+      dropG.setAttribute('transform', 'translate(' + cx + ' 0)');
     }
     buildPath();
     ScrollTrigger.addEventListener('refreshInit', buildPath);
 
     mm.add('(prefers-reduced-motion: no-preference)', function () {
+      // sol que gira despacio y gota que hace ondas
+      gsap.to(raysG, { rotation: 360, duration: 40, ease: 'none', repeat: -1, svgOrigin: '0 0' });
+      gsap.to(sunG, { scale: 1.06, duration: 2.2, yoyo: true, repeat: -1, ease: 'sine.inOut', transformOrigin: '50% 50%' });
+      qa('.process__ripple').forEach(function (c, k) {
+        gsap.fromTo(c, { attr: { r: 6 }, opacity: 0.7 }, { attr: { r: 24 }, opacity: 0, duration: 1.8, repeat: -1, ease: 'power1.out', delay: k * 0.9 });
+      });
+      var splashTl = gsap.timeline({ paused: true })
+        .to('.process__splash circle', { attr: { cy: '-=26' }, opacity: 1, duration: 0.35, stagger: 0.06, ease: 'power2.out' })
+        .to('.process__splash circle', { attr: { cy: '+=26' }, opacity: 0, duration: 0.4, stagger: 0.06, ease: 'power2.in' }, 0.3)
+        .to(poolLabel, { opacity: 1, duration: 0.5 }, 0.2);
+      var splashed = false;
       gsap.fromTo(path, { drawSVG: '0%' }, {
         drawSVG: '100%', ease: 'none',
         scrollTrigger: {
           trigger: pwrap, start: 'top 65%', end: 'bottom 65%', scrub: true, invalidateOnRefresh: true,
           onUpdate: function (s) {
+            var p = s.progress;
             var len = path.getTotalLength();
-            var pt = path.getPointAtLength(len * s.progress);
-            drop.setAttribute('cx', pt.x); drop.setAttribute('cy', pt.y);
+            var pt = path.getPointAtLength(len * Math.min(1, p / 0.9)); // la gota llega al final un poco antes y cae a la piscina
+            var dropY = p < 0.9 ? pt.y : pt.y + (p - 0.9) / 0.1 * 22;
+            dropG.setAttribute('transform', 'translate(' + pt.x + ' ' + dropY + ')');
+            flowClip.setAttribute('height', Math.max(0, pt.y));
+            // la piscina se llena en el último tramo
+            var fill = Math.max(0, Math.min(1, (p - 0.78) / 0.2));
+            waterClip.setAttribute('y', poolTop + poolH - fill * poolH); waterClip.setAttribute('height', fill * poolH);
+            // cada paso se "enciende" cuando la gota lo alcanza
+            var wrapTop = pwrap.getBoundingClientRect().top;
+            steps.forEach(function (st) {
+              var y = st.getBoundingClientRect().top - wrapTop + st.offsetHeight * 0.4;
+              st.classList.toggle('is-done', pt.y >= y);
+            });
+            if (p >= 0.985 && !splashed) { splashed = true; splashTl.restart(); }
+            else if (p < 0.9 && splashed) { splashed = false; splashTl.pause(0); gsap.set(poolLabel, { opacity: 0 }); }
           }
         }
       });

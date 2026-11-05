@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="assets/video/poster.webp">
-  <link rel="stylesheet" href="css/styles.css?v=20261105i">
+  <link rel="stylesheet" href="css/styles.css?v=20261105j">
 </head>
 <body class="is-loading">
   <a class="skip" href="#modelos">Ir al contenido</a>
@@ -266,17 +266,29 @@
     <!-- ============ PROCESO: línea de agua que se dibuja ============ -->
     <section class="process" id="proceso">
       <header class="wrap process__head">
-        <p class="eyebrow eyebrow--pool">Cómo trabajamos</p>
+        <p class="eyebrow eyebrow--pool">Cómo trabajamos · del sol al agua</p>
         <h2 class="h2">Del primer boceto<br>al <em>primer chapuzón</em></h2>
       </header>
       <div class="wrap process__wrap">
-        <svg class="process__line" aria-hidden="true"><path class="process__path-bg"/><path class="process__path"/><circle class="process__drop" r="7"/></svg>
+        <svg class="process__line" aria-hidden="true">
+          <defs>
+            <linearGradient id="process-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100"><stop offset="0" stop-color="#f6b25a"/><stop offset=".22" stop-color="#4cc9e4"/><stop offset="1" stop-color="#0e7fb0"/></linearGradient>
+            <clipPath id="process-flowclip"><rect class="process__flowclip" x="-200" y="0" width="600" height="0"/></clipPath>
+            <clipPath id="process-waterclip"><rect class="process__waterclip" x="-200" y="0" width="600" height="0"/></clipPath>
+          </defs>
+          <path class="process__path-bg"/>
+          <path class="process__path"/>
+          <path class="process__path-flow" clip-path="url(#process-flowclip)"/>
+          <g class="process__sun"><g class="process__rays"></g><circle class="process__sunbody" r="13"/></g>
+          <g class="process__pool"><rect class="process__pool-rim" rx="10"/><rect class="process__pool-water" rx="8" clip-path="url(#process-waterclip)"/><g class="process__splash"><circle r="2.2"/><circle r="1.6"/><circle r="1.9"/></g><text class="process__pool-label" text-anchor="middle">¡Al agua!</text></g>
+          <g class="process__drop"><circle class="process__ripple" r="8"/><circle class="process__ripple" r="8"/><path class="process__dropshape" d="M0,-11 C4.5,-4 7.5,0 7.5,4 A7.5,7.5 0 1,1 -7.5,4 C-7.5,0 -4.5,-4 0,-11 Z"/></g>
+        </svg>
         <ol class="process__steps">
-          <li class="step"><span class="step__n">01</span><div><h3>Visita y cotización</h3><p>Conversamos sobre tu espacio, medimos el terreno y te enviamos una propuesta clara, sin letra chica.</p></div></li>
-          <li class="step"><span class="step__n">02</span><div><h3>Eliges modelo y color</h3><p>Te ayudamos a escoger la forma, el tamaño y el gelcoat que mejor conversan con tu jardín.</p></div></li>
-          <li class="step"><span class="step__n">03</span><div><h3>Excavación y base</h3><p>Preparamos el terreno, nivelamos y construimos una base firme y compactada.</p></div></li>
-          <li class="step"><span class="step__n">04</span><div><h3>Instalación de la piscina</h3><p>La piscina llega en una sola pieza, se posiciona con grúa y se nivela con precisión.</p></div></li>
-          <li class="step"><span class="step__n">05</span><div><h3>Llenado y entrega</h3><p>Conectamos la filtración, llenamos y te enseñamos todo lo necesario. Solo queda lanzarse.</p></div></li>
+          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l1 2h2v16H5V5h2z"/><path d="M9 3v3h6V3"/><path d="M8 11h8M8 15h5"/></svg></span><div><span class="step__n">Paso 01</span><h3>Visita y cotización</h3><p>Conversamos sobre tu espacio, medimos el terreno y te enviamos una propuesta clara, sin letra chica.</p></div></li>
+          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M7 7V5M12 7V4M17 7V5"/><circle cx="8" cy="12.5" r="1.3"/><circle cx="12" cy="12.5" r="1.3"/><circle cx="16" cy="12.5" r="1.3"/></svg></span><div><span class="step__n">Paso 02</span><h3>Eliges modelo y color</h3><p>Te ayudamos a escoger la forma, el tamaño y el gelcoat que mejor conversan con tu jardín.</p></div></li>
+          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v9"/><path d="M8 11h8v3a4 4 0 0 1-8 0z"/><path d="M3 21c3-2 6-2 9 0s6 2 9 0"/></svg></span><div><span class="step__n">Paso 03</span><h3>Excavación y base</h3><p>Preparamos el terreno, nivelamos y construimos una base firme y compactada.</p></div></li>
+          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M6 21V7l9-3"/><path d="M6 10h11"/><path d="M17 10v3"/><circle cx="17" cy="15" r="2"/><rect x="11" y="16" width="8" height="5" rx="1.5"/></svg></span><div><span class="step__n">Paso 04</span><h3>Instalación de la piscina</h3><p>La piscina llega en una sola pieza, se posiciona con grúa y se nivela con precisión.</p></div></li>
+          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/></svg></span><div><span class="step__n">Paso 05</span><h3>Llenado y entrega</h3><p>Conectamos la filtración, llenamos y te enseñamos todo lo necesario. Solo queda lanzarse.</p></div></li>
         </ol>
       </div>
     </section>
@@ -530,6 +542,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-  <script src="js/main.js?v=20261105i"></script>
+  <script src="js/main.js?v=20261105j"></script>
 </body>
 </html>

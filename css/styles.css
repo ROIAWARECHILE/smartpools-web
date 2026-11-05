@@ -640,26 +640,45 @@ h1, h2, h3, p { margin: 0; }
 }
 
 /* ---------- proceso ---------- */
-.process { background: var(--foam); padding: 140px 0 120px; overflow: hidden; }
+.process { background: linear-gradient(180deg, #fff6e8 0%, var(--foam) 32%, #e3f3f9 100%); padding: 140px 0 120px; overflow: hidden; }
 .process__head { text-align: center; }
 .process__wrap { position: relative; margin-top: 70px; max-width: 1040px; }
 .process__line { position: absolute; left: 50%; top: 0; width: 160px; transform: translateX(-50%); overflow: visible; }
-.process__path-bg { fill: none; stroke: rgba(14, 127, 176, .14); stroke-width: 2; }
-.process__path { fill: none; stroke: var(--pool); stroke-width: 3; stroke-linecap: round; }
-.process__drop { fill: var(--aqua-strong); filter: drop-shadow(0 0 8px rgba(76, 201, 228, .9)); }
-.process__steps { position: relative; list-style: none; margin: 0; padding: 30px 0; display: grid; gap: 10vh; }
+/* el boceto a lápiz se convierte en agua a medida que se dibuja */
+.process__path-bg { fill: none; stroke: #9aa7b6; stroke-width: 1.6; stroke-dasharray: 5 8; stroke-linecap: round; opacity: .7; }
+.process__path { fill: none; stroke: url(#process-grad); stroke-width: 5; stroke-linecap: round; }
+.process__path-flow { fill: none; stroke: rgba(255, 255, 255, .85); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 2 13; animation: process-flow 1.1s linear infinite; }
+@keyframes process-flow { to { stroke-dashoffset: -15; } }
+.process__sunbody { fill: #f7b955; filter: drop-shadow(0 0 14px rgba(247, 185, 85, .75)); }
+.process__rays line { stroke: #f7b955; stroke-width: 2.4; stroke-linecap: round; }
+.process__pool-rim { fill: #fff; stroke: var(--pool); stroke-width: 2; }
+.process__pool-water { fill: var(--aqua-strong); opacity: .9; }
+.process__splash circle { fill: var(--aqua-strong); opacity: 0; }
+.process__pool-label { font-family: var(--serif); font-style: italic; font-size: 22px; fill: var(--pool); opacity: 0; }
+.process__dropshape { fill: var(--aqua-strong); filter: drop-shadow(0 2px 6px rgba(76, 201, 228, .9)); }
+.process__ripple { fill: none; stroke: var(--aqua-strong); stroke-width: 1.5; opacity: 0; }
+.step__badge {
+  flex: none; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%;
+  background: #fff; color: var(--pool); border: 2px solid rgba(14, 127, 176, .25);
+  box-shadow: 0 12px 26px -16px rgba(14, 127, 176, .5);
+  transition: background .5s var(--ease), color .5s var(--ease), border-color .5s var(--ease), transform .5s var(--ease);
+}
+.step__badge svg { width: 28px; height: 28px; }
+.step.is-done .step__badge { background: var(--pool); color: #fff; border-color: var(--pool); transform: scale(1.08); }
+.process__steps { position: relative; list-style: none; margin: 0; padding: 50px 0 170px; display: grid; gap: 10vh; }
 .step { display: flex; gap: 22px; width: calc(50% - 110px); }
 .step:nth-child(odd) { margin-right: auto; flex-direction: row-reverse; text-align: right; }
 .step:nth-child(even) { margin-left: auto; }
-.step__n { flex: none; font-family: var(--serif); font-style: italic; font-size: 3.2rem; line-height: .9; color: var(--pool); }
+.step__n { display: block; margin-bottom: 6px; font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--pool); }
 .step h3 { font-family: var(--serif); font-weight: 500; font-size: 1.9rem; line-height: 1.1; }
 .step p { margin-top: 8px; color: var(--ink-soft); }
 @media (max-width: 760px) {
   .process { padding: 100px 0 90px; }
   .process__line { left: 0; width: 48px; transform: none; }
-  .step, .step:nth-child(odd), .step:nth-child(even) { width: auto; margin: 0; padding-left: 64px; flex-direction: column; text-align: left; gap: 6px; }
-  .step__n { font-size: 2.4rem; }
-  .process__steps { gap: 7vh; }
+  .step, .step:nth-child(odd), .step:nth-child(even) { width: auto; margin: 0; padding-left: 70px; flex-direction: row; text-align: left; gap: 14px; }
+  .step__badge { width: 46px; height: 46px; }
+  .step__badge svg { width: 22px; height: 22px; }
+  .process__steps { gap: 7vh; padding-bottom: 150px; }
 }
 
 /* ---------- galería ---------- */
@@ -994,3 +1013,8 @@ html.is-gated body { overscroll-behavior: none; }
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5), 0 0 10px rgba(255, 255, 255, .25);
 }
 .seq, .seq__back { will-change: transform, filter; }
+
+/* el inicio es sticky: todo lo que viene después se pinta encima y lo tapa */
+main > :not(.hero--seq), footer { position: relative; z-index: 1; }
+.cat { z-index: 2; }
+.hero--seq.is-covered { visibility: hidden; }
