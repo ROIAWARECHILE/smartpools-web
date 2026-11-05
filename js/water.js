@@ -36,12 +36,13 @@
     '  return clamp(pow(abs(c), 8.0), 0.0, 1.0);',
     '}',
     // pantalla (y hacia abajo) -> coordenadas de la imagen, igual que object-fit: cover
-    'vec2 cover(vec2 s, float z){',
+    'vec2 coverF(vec2 s, float z, vec2 f){',
     '  float rs = uRes.x / uRes.y; float ri = uImg.x / uImg.y;',
     '  vec2 sc = rs > ri ? vec2(1.0, ri / rs) : vec2(rs / ri, 1.0);',
     '  sc /= z;',
-    '  return (1.0 - sc) * uFocus + s * sc;',
+    '  return (1.0 - sc) * f + s * sc;',
     '}',
+    'vec2 cover(vec2 s, float z){ return coverF(s, z, uFocus); }',
     'float waterMask(vec2 p){ return smoothstep(uEdge - 0.002, uEdge + 0.02, p.y); }',
     'float height(vec2 p){',
     '  float ia = uImg.x / uImg.y;',
@@ -85,19 +86,23 @@
     '    float wl = level + 0.012 * sin(s.x * 11.0 + uTime * 1.8) + 0.006 * sin(s.x * 29.0 - uTime * 2.6);',
     '    float under = smoothstep(wl - 0.004, wl + 0.004, s.y);',
     // lo que queda sobre el agua se desenfoca (la cámara ya está al ras de la superficie)
-    '    float bl = 0.0045 * smoothstep(0.0, 0.45, uRise) * (1.0 - under);',
+    '    float above = clamp((wl - s.y) / 0.45, 0.0, 1.0);',
+    '    float bl = 0.0032 * smoothstep(0.0, 0.4, uRise) * above * (1.0 - under);',
     '    if (bl > 0.0002) {',
     '      vec3 acc = vec3(0.0);',
     '      for (int k = 0; k < 8; k++) {',
     '        float a = float(k) * 0.7854;',
     '        acc += texture2D(uTex, p + off + vec2(cos(a), sin(a) * uRes.x / uRes.y) * bl).rgb;',
     '      }',
-    '      col = mix(col, acc / 8.0 + spec * 0.2, 0.9);',
+    '      col = mix(col, acc / 8.0 + spec * 0.2, 0.85);',
     '    }',
     '    if (under > 0.0) {',
     '      float wob = mix(0.007, 0.0022, smoothstep(0.6, 1.0, uRise));',
     '      vec2 w = vec2(sin(s.y * 22.0 + uTime * 1.4), cos(s.x * 17.0 + uTime * 1.1)) * wob;',
-    '      vec2 pu = cover(vec2(s.x, s.y - max(wl, 0.0)), 1.0) + w;',
+    '      float zt = smoothstep(0.3, 1.0, uRise);',
+    '      float uz = mix(1.6, 1.0, zt);',
+    '      vec2 uf = mix(vec2(0.1, 0.05), uFocus, zt);',
+    '      vec2 pu = coverF(vec2(s.x, s.y - max(wl, 0.0)), uz, uf) + w;',
     '      vec3 u = texture2D(uTex2, pu).rgb;',
     '      u += caustic(vec2(s.x * uRes.x / uRes.y, s.y) * 1.3, uTime * 0.5 + 23.0) * 0.06;',
     '      u = mix(u, u * vec3(0.82, 0.93, 1.0), (1.0 - smoothstep(0.0, 0.25, s.y - wl)) * (1.0 - uRise) * 0.6);',
@@ -280,15 +285,19 @@
     };
   }
   var lastB = now();
-  function drawBubbles(alpha) {
+  function drawBubbles(alpha, wlFrac, extra) {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = bubCanvas.clientWidth, h = bubCanvas.clientHeight;
     if (bubCanvas.width !== Math.round(w * dpr)) { bubCanvas.width = Math.round(w * dpr); bubCanvas.height = Math.round(h * dpr); }
     var t = now(), dt = Math.min(0.05, t - lastB); lastB = t;
-    var target = Math.round(Math.min(90, 26 + w / 45 + bubBoost * 40));
+    var target = Math.round(Math.min(130, 26 + w / 45 + bubBoost * 40 + extra));
     while (bubbles.length < target) bubbles.push(spawnBubble(w, h, bubbles.length < 16));
     bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     bctx.clearRect(0, 0, w, h);
+    bctx.save();
+    bctx.beginPath();
+    bctx.rect(0, Math.max(0, wlFrac * h + 6), w, h);
+    bctx.clip();
     bctx.globalAlpha = alpha;
     for (var i = bubbles.length - 1; i >= 0; i--) {
       var b = bubbles[i];
@@ -306,6 +315,7 @@
       bctx.fillStyle = 'rgba(255,255,255,' + (0.6 * fade) + ')';
       bctx.fill();
     }
+    bctx.restore();
     bubBoost *= 0.94;
   }
 
@@ -335,8 +345,10 @@
         H.draw();
       }
       if (bctx) {
-        var a = Math.max(0, (state.rise - 0.35) / 0.65);
-        if (a > 0) { drawBubbles(a); bubblesOn = true; }
+        var a = Math.min(1, Math.max(0, (state.rise - 0.12) / 0.4));
+        var wl = 1.12 - 1.28 * state.rise;
+        var extra = 70 * (1 - Math.min(1, Math.max(0, (state.rise - 0.8) / 0.2)));
+        if (a > 0) { drawBubbles(a, wl, extra); bubblesOn = true; }
         else if (bubblesOn) { bctx.clearRect(0, 0, bubCanvas.width, bubCanvas.height); bubblesOn = false; }
       }
     }
