@@ -109,51 +109,13 @@
     if ((W / H > SEQ_RATIO) !== portrait) { h = H; w = H * SEQ_RATIO; } else { w = W; h = W / SEQ_RATIO; }
     seqEl.style.width = w + 'px'; seqEl.style.height = h + 'px';
     seqEl.style.left = (W - w) / 2 + 'px'; seqEl.style.top = (H - h) / 2 + 'px';
-    seqEl.style.setProperty('--u', (w / 100) + 'px'); // unidad: 1% del ancho del cuadro
   }
   fitSeq();
   window.addEventListener('resize', fitSeq);
-  /* texto real encima de cada cuadro: posiciones en % del cuadro, tamaños en % de su ancho */
-  var NAV = [
-    ['nav', 37.3, 4.6, 'Modelos'], ['nav', 45.4, 4.6, 'Fibra Reforzada'], ['nav', 57.9, 4.6, 'Inspiración'], ['nav', 67.9, 4.6, 'Contacto'],
-    ['btn', 83.6, 4.6, 'Cotiza tu piscina', 12.9]
-  ];
-  function cardsA(top) {
-    return [['serif', 18.6, top, 'Ventajas del<br>Fiberglass'], ['serif', 52.0, top, 'Diseños<br>de Piscina'], ['serif', 83.2, top, 'Instalaciones<br>Reales']];
-  }
-  var PARA = 'Deja que el agua te guíe a un estado más tranquilo.<br>Nuestras piscinas de fibra de vidrio están<br>diseñadas para realzar cada momento, con un<br>interior suave, resistente y pensado para durar.';
-  var LAY_A = NAV.concat([['eyebrow', 37.2, 16, 'Piscinas de fibra de vidrio reforzado', 0, 1.13], ['btn2', 48.6, 39.7, 'Ver modelos', 11.2]], cardsA(85.3));
-  var LAY_B = NAV.concat([['btn2', 48.6, 33.2, 'Ver modelos', 11.2]], cardsA(86.3));
-  var LAY_C = NAV.concat([['eyebrow', 12.2, 33.8, 'Inmersión', 0, 1.4], ['p', 12.2, 57.1, PARA, 0, 1.75, 1.48]]);
-  var LAY_D = NAV.concat([['eyebrow', 10.3, 35.2, 'Inmersión', 0, 1.4], ['p', 10.3, 56.7, PARA, 0, 1.68, 1.47],
-    ['eyebrow', 10.3, 88.6, 'Bajo la superficie', 0, 1.33], ['link', 71.3, 94.2, 'Ver todas las características', 22.5, 1.6]]);
-  var LAY_E = NAV.concat([['eyebrow', 11.2, 25.6, 'Inmersión', 0, 1.1], ['p', 11.2, 43.75, PARA, 0, 1.45, 1.65],
-    ['eyebrow', 11.2, 62.1, 'Bajo la superficie', 0, 1.19], ['link', 73.2, 66.8, 'Ver todas las características', 19.5, 1.45],
-    ['eyebrow', 11.2, 87.6, 'Diseño funcional', 0, 0.86], ['serif1', 11.2, 91.2, 'Escalones Integrados'],
-    ['eyebrow', 40.2, 87.6, 'Estética superior', 0, 0.86], ['serif1', 40.2, 91.2, 'Interior Celeste'],
-    ['eyebrow', 68.6, 87.6, 'Calidad en cada detalle', 0, 0.86], ['serif1', 68.6, 91.2, 'Detalles Reales']]);
-  var LAYS = [LAY_A, LAY_A, LAY_A, LAY_B, LAY_C, LAY_D, LAY_E, LAY_E];
-  var ovs = LAYS.map(function (lay, k) {
-    var d = document.createElement('div');
-    d.className = 'seq__ov' + (k === 4 ? ' seq__ov--faint' : '');
-    d.setAttribute('aria-hidden', 'true');
-    lay.forEach(function (e) {
-      var el = document.createElement('div');
-      el.className = 'ov ov-' + e[0];
-      el.style.left = e[1] + '%'; el.style.top = e[2] + '%';
-      if (e[4]) el.style.width = e[4] + '%';
-      if (e[5]) el.style.fontSize = 'calc(var(--u) * ' + e[5] + ')';
-      if (e[6]) el.style.lineHeight = e[6];
-      el.innerHTML = (e[0] === 'btn' || e[0] === 'btn2' || e[0] === 'link') ? '<span>' + e[3] + '</span><span class="ov-arrow">→</span>' : e[3];
-      d.appendChild(el);
-    });
-    seqEl.insertBefore(d, hots[0] || null);
-    return d;
-  });
   var curFrame = -1;
   function showFrame(f) {
     // f es continuo: fundido entre el cuadro entero más cercano y el siguiente
-    frames.forEach(function (img, k) { var o = Math.max(0, Math.min(1, 1 - Math.abs(f - k))); img.style.opacity = o; if (bgs[k]) bgs[k].style.opacity = o; ovs[k].style.opacity = o; });
+    frames.forEach(function (img, k) { var o = Math.max(0, Math.min(1, 1 - Math.abs(f - k))); img.style.opacity = o; if (bgs[k]) bgs[k].style.opacity = o; });
     var n = Math.round(f);
     if (n === curFrame) return;
     curFrame = n;

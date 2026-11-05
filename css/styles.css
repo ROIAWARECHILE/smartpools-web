@@ -982,21 +982,3 @@ body.modal-open { overflow: hidden; }
 @media (max-width: 760px) { .hero--seq { min-height: 0; } }
 .seq__back { position: absolute; inset: -40px; overflow: hidden; filter: blur(26px) brightness(.92); }
 .seq__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
-
-/* ---------- hero: texto real sobre los cuadros (el GIF traía estos textos ilegibles) ---------- */
-.seq { --u: 1px; }
-.seq__ov { position: absolute; inset: 0; opacity: 0; pointer-events: none; color: #fff; font-family: 'Jost', system-ui, sans-serif; will-change: opacity; }
-.ov { position: absolute; white-space: nowrap; line-height: 1; }
-.ov-nav, .ov-serif1, .ov-eyebrow, .ov-btn, .ov-btn2, .ov-link { transform: translateY(-50%); }
-.ov-nav { font-size: calc(var(--u) * 1.3); font-weight: 500; letter-spacing: .01em; }
-.ov-btn, .ov-btn2, .ov-link { display: flex; justify-content: space-between; align-items: center; font-weight: 500; }
-.ov-btn, .ov-btn2 { color: #163d5c; font-size: calc(var(--u) * 1.37); }
-.ov-btn2 { font-size: calc(var(--u) * 1.5); }
-.ov-link { font-size: calc(var(--u) * 1.2); }
-.ov-arrow { font-size: 1.15em; line-height: 1; }
-.ov-eyebrow { text-transform: uppercase; letter-spacing: .28em; font-weight: 500; opacity: .92; }
-.ov-serif, .ov-serif1 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; }
-.ov-serif { font-size: calc(var(--u) * 1.9); line-height: 1.6; }
-.ov-serif1 { font-size: calc(var(--u) * 1.8); }
-.ov-p { font-weight: 400; opacity: .92; }
-.seq__ov--faint .ov-nav, .seq__ov--faint .ov-btn { opacity: .45; }
