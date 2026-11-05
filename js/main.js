@@ -675,7 +675,7 @@
         .fromTo('.seq', { scale: 1, filter: 'blur(0px) brightness(1)' }, { scale: 1.12, filter: 'blur(14px) brightness(.72)', duration: 1 }, 0)
         .fromTo('.seq__back', { filter: 'blur(26px) brightness(.92)' }, { filter: 'blur(40px) brightness(.6)', duration: 1 }, 0)
         .to('.hero__exit', { autoAlpha: 0.55, duration: 1 }, 0)
-        .fromTo('.cat__wave', { scaleY: 1.8 }, { scaleY: 1, duration: 1, ease: 'power1.out' }, 0);
+        .fromTo('.cat__wave', { scaleY: 1.8, yPercent: 100 }, { scaleY: 1, yPercent: 0, duration: 0.6, ease: 'power1.out' }, 0);
       // burbujas que suben mientras la sección aparece
       gsap.utils.toArray('.bubbles span').forEach(function (b) {
         var d = parseFloat(getComputedStyle(b).getPropertyValue('--d')) || 0;
