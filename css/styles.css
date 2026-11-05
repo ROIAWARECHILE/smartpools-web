@@ -111,17 +111,6 @@ h1, h2, h3, p { margin: 0; }
   font-size: 11.5px; letter-spacing: .3em; text-transform: uppercase; opacity: .7;
 }
 
-/* ---------- cursor ---------- */
-.cursor { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; mix-blend-mode: difference; display: none; opacity: 0; transition: opacity .3s; }
-.cursor.is-on { opacity: 1; }
-.cursor__ring {
-  display: block; width: 34px; height: 34px; margin: -17px 0 0 -17px;
-  border: 1.5px solid #fff; border-radius: 50%;
-  transition: transform .35s var(--ease), background-color .35s var(--ease), border-radius .35s var(--ease);
-}
-.cursor.is-link .cursor__ring { transform: scale(1.7); background: #fff; }
-.cursor.is-water .cursor__ring { transform: scale(1.5, .62); }
-@media (hover: hover) and (pointer: fine) { .cursor { display: block; } }
 
 /* ---------- profundidad ---------- */
 .depth {
@@ -410,13 +399,13 @@ h1, h2, h3, p { margin: 0; }
 .feat { display: contents; }
 .feat__visual { position: relative; display: grid; place-items: center; min-height: 380px; }
 .feat__img {
-  width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover;
   border-radius: 22px;
   box-shadow: 0 40px 70px -34px rgba(20, 60, 110, .5), 0 0 0 1px rgba(255, 255, 255, .6);
 }
 .feat__img.is-photo {
   width: 100%; border-radius: 22px; -webkit-mask-image: none; mask-image: none;
-  aspect-ratio: 4 / 3; object-fit: cover;
+  aspect-ratio: 3 / 2; object-fit: cover;
   transform: rotate(-6deg);
   box-shadow: 0 40px 70px -30px rgba(20, 60, 110, .45);
   filter: none;
@@ -466,7 +455,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .mcard:hover { box-shadow: 0 26px 50px -26px rgba(20, 60, 120, .55); }
 .mcard.is-active { outline-color: #5b95f3; }
-.mcard__img { aspect-ratio: 2.05; overflow: hidden; }
+.mcard__img { aspect-ratio: 3 / 2; overflow: hidden; }
 .mcard__img img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
 .mcard:hover .mcard__img img { transform: scale(1.06); }
 .mcard__body { padding: 18px 20px 20px; }
@@ -901,7 +890,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .modal__close svg { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
 .modal__close:hover { background: #fff; transform: rotate(90deg); }
-.modal__media { position: relative; min-height: 320px; background: #dfeef7; }
+.modal__media { position: relative; min-height: 320px; aspect-ratio: 3 / 2; background: #dfeef7; }
 .modal__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .modal__badge { position: absolute; left: 20px; top: 20px; }
 .modal__thumbs { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
@@ -992,3 +981,16 @@ html.is-gated body { overscroll-behavior: none; }
 .seq__poster { z-index: 1; }
 .seq__bg--surface { opacity: 1; }
 .hot { z-index: 2; }
+
+/* ---------- transición del fondo de la piscina a "Nuestros modelos" ---------- */
+.hero--seq { position: sticky; top: 0; z-index: 0; }
+.cat { overflow: visible; z-index: 2; }
+.cat__wave { position: absolute; left: 0; top: -88px; width: 100%; height: 90px; display: block; pointer-events: none; fill: #d6eef6; transform-origin: 50% 100%; }
+.bubbles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
+.bubbles span {
+  position: absolute; left: calc(var(--x) * 1%); bottom: -40px; width: calc(var(--s) * 1px); height: calc(var(--s) * 1px);
+  border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, .95), rgba(255, 255, 255, .35) 45%, rgba(255, 255, 255, .08) 70%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5), 0 0 10px rgba(255, 255, 255, .25);
+}
+.seq, .seq__back { will-change: transform, filter; }

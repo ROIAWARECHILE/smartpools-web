@@ -85,20 +85,6 @@
     scrollToTarget(id === '#inicio' ? 0 : el);
   });
 
-  /* ---------------- cursor ---------------- */
-  if (finePointer && !reduce) {
-    var cursor = q('.cursor');
-    var xTo = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3' });
-    var yTo = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3' });
-    window.addEventListener('pointermove', function (e) {
-      xTo(e.clientX); yTo(e.clientY);
-      cursor.classList.add('is-on');
-    }, { passive: true });
-    document.addEventListener('pointerover', function (e) {
-      cursor.classList.toggle('is-link', !!e.target.closest('a, button, input, select, textarea'));
-    });
-  }
-
   /* ---------------- hero: video de la inmersión ---------------- */
   var heroEl = q('.hero');
   var seqEl = q('.seq');
@@ -601,7 +587,8 @@
 
       /* ---- HERO: un solo scroll reproduce el video del descenso hasta el fondo ---- */
       var nav = q('.nav');
-      var SURFACE_UNTIL = 3.0, DEEP_FROM = 4.4, RELEASE_AT = 5.3, RATE = 1.25; // segundos del video
+      var SURFACE_UNTIL = 3.0, DEEP_FROM = 4.4, RELEASE_AT = 5.0; // segundos del video
+      function rateAt(t) { return t < 3.1 ? 2.4 : t < 4.6 ? 1.5 : 1.6; } // velocidad por tramo
       var descended = false, moving = false, topSince = null, afterDescend = null, rafId = null;
       function gate(on) {
         document.documentElement.classList.toggle('is-gated', on);
@@ -616,6 +603,7 @@
       }
       function tick() {
         var t = vid.currentTime;
+        var r = rateAt(t); if (vid.playbackRate !== r) vid.playbackRate = r;
         setPhase(phaseAt(t));
         bgDeep.style.opacity = Math.max(0, Math.min(1, (t - 3.2) / 1.2));
         if (moving && t >= RELEASE_AT) finishDescent();
@@ -626,7 +614,7 @@
         if (cb) afterDescend = cb;
         if (moving) return;
         moving = true; gate(true);
-        vid.playbackRate = RATE;
+        vid.playbackRate = rateAt(vid.currentTime);
         var reveal = function () { gsap.to(poster, { autoAlpha: 0, duration: 0.3, overwrite: true }); };
         if ('requestVideoFrameCallback' in vid) vid.requestVideoFrameCallback(reveal); else vid.addEventListener('playing', reveal, { once: true });
         var pr = vid.play();
@@ -671,12 +659,31 @@
         else if (restingAtTop() && up) { e.preventDefault(); ascend(); }
       });
       // la nav real se esconde mientras el video (que trae su propio menú) está en pantalla
+      // (el hero es sticky, así que se mide con la sección siguiente, que sí está en el flujo normal)
       ScrollTrigger.create({
-        trigger: '.hero', start: 'top top', end: 'bottom top',
-        onToggle: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); },
-        onRefresh: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); }
+        trigger: '.cat', start: 'top 40px', end: 'max',
+        onToggle: function (st) { nav.classList.toggle('nav--inhero', !st.isActive && !menuOpen); },
+        onRefresh: function (st) { nav.classList.toggle('nav--inhero', !st.isActive && !menuOpen); }
       });
       if (!window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
+
+      /* ---- SALIDA DEL AGUA: "Nuestros modelos" sube sobre el fondo de la piscina ---- */
+      gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: '.cat', start: 'top bottom', end: 'top 10%', scrub: 0.5 }
+      })
+        .fromTo('.seq', { scale: 1, filter: 'blur(0px) brightness(1)' }, { scale: 1.12, filter: 'blur(14px) brightness(.72)', duration: 1 }, 0)
+        .fromTo('.seq__back', { filter: 'blur(26px) brightness(.92)' }, { filter: 'blur(40px) brightness(.6)', duration: 1 }, 0)
+        .to('.hero__exit', { autoAlpha: 0.55, duration: 1 }, 0)
+        .fromTo('.cat__wave', { scaleY: 1.8 }, { scaleY: 1, duration: 1, ease: 'power1.out' }, 0);
+      // burbujas que suben mientras la sección aparece
+      gsap.utils.toArray('.bubbles span').forEach(function (b) {
+        var d = parseFloat(getComputedStyle(b).getPropertyValue('--d')) || 0;
+        gsap.timeline({ scrollTrigger: { trigger: '.cat', start: 'top bottom', end: 'top 20%', scrub: 0.8 } })
+          .fromTo(b, { y: 0, opacity: 0 }, { opacity: 0.9, duration: 0.15 }, d * 0.4)
+          .to(b, { y: function () { return -window.innerHeight * (0.7 + d * 0.5); }, x: (d - 0.5) * 60, duration: 0.85 - d * 0.3, ease: 'power1.in' }, d * 0.4)
+          .to(b, { opacity: 0, duration: 0.15 }, 0.85 - d * 0.3 + d * 0.4 - 0.15);
+      });
 
       /* ---- MODELOS ---- */
       var ch = SplitText.create('.cat__top .cat__h2 > span', { type: 'words', mask: 'words' });
