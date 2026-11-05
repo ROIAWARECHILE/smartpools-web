@@ -986,3 +986,9 @@ body.modal-open { overflow: hidden; }
 /* compuerta del hero: la página no se desplaza hasta el primer scroll */
 html.is-gated { overflow: hidden; }
 html.is-gated body { overscroll-behavior: none; }
+
+/* ---------- hero: video ---------- */
+.seq__video, .seq__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
+.seq__poster { z-index: 1; }
+.seq__bg--surface { opacity: 1; }
+.hot { z-index: 2; }

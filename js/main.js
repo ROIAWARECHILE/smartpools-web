@@ -99,15 +99,16 @@
     });
   }
 
-  /* ---------------- hero: secuencia de cuadros ---------------- */
+  /* ---------------- hero: video de la inmersión ---------------- */
   var heroEl = q('.hero');
   var seqEl = q('.seq');
-  var frames = qa('.seq__f');
+  var vid = q('.seq__video');
+  var poster = q('.seq__poster');
+  var bgDeep = q('.seq__bg--deep');
   var hots = qa('.hot');
   var SEQ_RATIO = 1280 / 720;
-  var bgs = qa('.seq__bg');
   function fitSeq() {
-    // escritorio: el cuadro entero (contain), con el mismo cuadro desenfocado de fondo; vertical: cover
+    // escritorio: el video entero (contain) con el mismo cuadro desenfocado de fondo; vertical: cover
     var W = heroEl.clientWidth, H = heroEl.clientHeight, w, h;
     var portrait = W < H;
     if ((W / H > SEQ_RATIO) !== portrait) { h = H; w = H * SEQ_RATIO; } else { w = W; h = W / SEQ_RATIO; }
@@ -116,24 +117,17 @@
   }
   fitSeq();
   window.addEventListener('resize', fitSeq);
-  var curFrame = -1;
-  function showFrame(f) {
-    // f es continuo: fundido entre el cuadro entero más cercano y el siguiente
-    frames.forEach(function (img, k) { var o = Math.max(0, Math.min(1, 1 - Math.abs(f - k))); img.style.opacity = o; if (bgs[k]) bgs[k].style.opacity = o; });
-    var n = Math.round(f);
-    if (n === curFrame) return;
-    curFrame = n;
-    hots.forEach(function (a) {
-      var r = a.dataset.f.split('-');
-      a.classList.toggle('is-live', n >= Number(r[0]) && n <= Number(r[1]));
-    });
+  var curPhase = '';
+  function setPhase(ph) {
+    if (ph === curPhase) return;
+    curPhase = ph;
+    hots.forEach(function (a) { a.classList.toggle('is-live', a.dataset.ph === 'all' || a.dataset.ph === ph); });
   }
-  showFrame(0);
+  setPhase('surface');
   var heroReadyPromise = new Promise(function (res) {
-    var first = frames[0];
-    if (first.complete) res(); else { first.addEventListener('load', res, { once: true }); first.addEventListener('error', res, { once: true }); }
+    if (poster.complete) res(); else { poster.addEventListener('load', res, { once: true }); poster.addEventListener('error', res, { once: true }); }
   });
-  frames.forEach(function (img) { if (img.decode) img.decode().catch(function () {}); });
+  try { vid.load(); } catch (e) {}
 
   /* ---------------- catálogo de modelos ---------------- */
   // Medidas, tamaños y precios tomados de las fichas técnicas (láminas) de Smart Pools.
@@ -605,39 +599,52 @@
 
     mm.add('(prefers-reduced-motion: no-preference)', function () {
 
-      /* ---- HERO: un solo scroll baja al fondo de la piscina; la secuencia se reproduce sola ---- */
+      /* ---- HERO: un solo scroll reproduce el video del descenso hasta el fondo ---- */
       var nav = q('.nav');
-      var heroSt = { p: 0 };
-      var LAST = frames.length - 1;
-      var descended = false, moving = false, topSince = null, afterDescend = null;
+      var SURFACE_UNTIL = 3.0, DEEP_FROM = 4.4, RELEASE_AT = 5.3, RATE = 1.25; // segundos del video
+      var descended = false, moving = false, topSince = null, afterDescend = null, rafId = null;
       function gate(on) {
         document.documentElement.classList.toggle('is-gated', on);
         if (lenis) { if (on) lenis.stop(); else lenis.start(); }
       }
       function atTop() { return (lenis ? lenis.scroll : window.scrollY) < 4; }
-      // ritmo del descenso: breve espera en la superficie, cruce del agua y asentamiento en el fondo
-      var dive = gsap.timeline({
-        paused: true,
-        onUpdate: function () { showFrame(heroSt.p); },
-        onComplete: function () {
-          descended = true; moving = false; gate(false); topSince = performance.now();
-          if (afterDescend) { var cb = afterDescend; afterDescend = null; cb(); }
-        },
-        onReverseComplete: function () { descended = false; moving = false; }
-      })
-        .to(heroSt, { p: 19, duration: 0.55, ease: 'none' })
-        .to(heroSt, { p: 28, duration: 1.25, ease: 'power1.inOut' })
-        .to(heroSt, { p: LAST, duration: 1.7, ease: 'power1.out' });
+      function phaseAt(t) { return t < SURFACE_UNTIL ? 'surface' : t >= DEEP_FROM ? 'deep' : 'mid'; }
+      function finishDescent() {
+        if (!moving) return;
+        descended = true; moving = false; gate(false); topSince = performance.now();
+        if (afterDescend) { var cb = afterDescend; afterDescend = null; cb(); }
+      }
+      function tick() {
+        var t = vid.currentTime;
+        setPhase(phaseAt(t));
+        bgDeep.style.opacity = Math.max(0, Math.min(1, (t - 3.2) / 1.2));
+        if (moving && t >= RELEASE_AT) finishDescent();
+        if (!vid.paused && !vid.ended) rafId = requestAnimationFrame(tick); else rafId = null;
+      }
       function descend(cb) {
         if (descended) { if (cb) cb(); return; }
         if (cb) afterDescend = cb;
         if (moving) return;
-        moving = true; gate(true); dive.timeScale(1).play();
+        moving = true; gate(true);
+        vid.playbackRate = RATE;
+        var reveal = function () { gsap.to(poster, { autoAlpha: 0, duration: 0.3, overwrite: true }); };
+        if ('requestVideoFrameCallback' in vid) vid.requestVideoFrameCallback(reveal); else vid.addEventListener('playing', reveal, { once: true });
+        var pr = vid.play();
+        if (pr && pr.catch) pr.catch(function () { finishDescent(); }); // si el navegador no deja reproducir, se libera el scroll
+        if (!rafId) rafId = requestAnimationFrame(tick);
+        gsap.delayedCall(9, finishDescent); // seguro por si el video tarda demasiado en cargar
       }
       function ascend() {
         if (moving || !descended) return;
-        moving = true; gate(true); dive.timeScale(1.35).reverse();
+        moving = true; gate(true);
+        gsap.to(poster, { autoAlpha: 1, duration: 0.9, ease: 'power2.inOut', overwrite: true });
+        gsap.to(bgDeep, { opacity: 0, duration: 0.9, ease: 'power2.inOut' });
+        gsap.delayedCall(0.95, function () {
+          vid.pause(); vid.currentTime = 0; setPhase('surface');
+          descended = false; moving = false;
+        });
       }
+      vid.addEventListener('ended', finishDescent);
       heroDescend = descend;
       gate(true); // la página no baja hasta que el visitante haga su primer scroll
       function restingAtTop() { return descended && !moving && atTop() && topSince !== null && performance.now() - topSince > 400; }
