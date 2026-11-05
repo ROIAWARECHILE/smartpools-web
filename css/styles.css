@@ -58,7 +58,7 @@ h1, h2, h3, p { margin: 0; }
   text-transform: uppercase;
 }
 .eyebrow--aqua { color: var(--aqua); }
-.eyebrow--pool { color: var(--pool); }
+.eyebrow--pool { color: #0a6a95; }
 
 .h2 {
   font-family: var(--serif);
@@ -412,7 +412,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .feat__name { display: flex; align-items: center; gap: 12px; }
 .feat__title { font-size: 26px; font-weight: 800; letter-spacing: -.01em; }
-.badge { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--blue); background: #e2edfd; white-space: nowrap; }
+.badge { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #0d49ad; background: #e2edfd; white-space: nowrap; }
 .badge[hidden] { display: none; }
 .feat__desc { margin-top: 12px; font-size: 16px; color: #2d3b55; }
 .feat__specs { display: flex; flex-wrap: wrap; gap: 14px 16px; margin-top: 24px; }
@@ -462,6 +462,7 @@ h1, h2, h3, p { margin: 0; }
 .mcard__top { display: flex; align-items: center; gap: 10px; }
 .mcard__top h3 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .mcard__go {
+  font: inherit; cursor: pointer; background: none; padding: 0;
   margin-left: auto; flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
   border: 1.5px solid #1d2a44; color: #1d2a44; transition: background-color .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease);
 }
@@ -810,7 +811,7 @@ h1, h2, h3, p { margin: 0; }
   opacity: 0; pointer-events: none; transition: opacity .3s var(--ease), transform .3s var(--ease);
 }
 .wa:hover .wa__tip, .wa:focus-visible .wa__tip { opacity: 1; transform: translateY(-50%); }
-.btn--wa { background: #25d366; color: #fff; gap: 10px; }
+.btn--wa { background: #25d366; color: #06331c; gap: 10px; }
 .btn--wa svg { width: 20px; height: 20px; fill: currentColor; }
 .btn--wa:hover { background: #1ebe5a; }
 @media (max-width: 760px) { .wa { right: 16px; bottom: 16px; width: 54px; height: 54px; } .wa__tip { display: none; } }
@@ -1018,3 +1019,5 @@ html.is-gated body { overscroll-behavior: none; }
 main > :not(.hero--seq), footer { position: relative; z-index: 1; }
 .cat { z-index: 2; }
 .hero--seq.is-covered { visibility: hidden; }
+
+.mcard__go:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }

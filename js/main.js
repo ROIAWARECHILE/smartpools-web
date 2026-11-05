@@ -113,7 +113,6 @@
   var heroReadyPromise = new Promise(function (res) {
     if (poster.complete) res(); else { poster.addEventListener('load', res, { once: true }); poster.addEventListener('error', res, { once: true }); }
   });
-  try { vid.load(); } catch (e) {}
 
   /* ---------------- catálogo de modelos ---------------- */
   // Medidas, tamaños y precios tomados de las fichas técnicas (láminas) de Smart Pools.
@@ -227,15 +226,12 @@
     a.className = 'mcard' + (i === 0 ? ' is-active' : '');
     a.dataset.i = i;
     a.dataset.cat = m.cat.join(' ');
-    a.tabIndex = 0;
-    a.setAttribute('role', 'button');
-    a.setAttribute('aria-label', 'Ver ficha de ' + m.name);
     if (i >= INITIAL_CARDS) a.style.display = 'none';
     a.innerHTML =
-      '<div class="mcard__img"><img src="' + m.img + '" alt="Piscina ' + m.name + '" loading="lazy" width="900" height="600"></div>' +
+      '<div class="mcard__img"><img src="' + m.img + '" srcset="' + m.img.replace('-1-card.webp', '-1-card-sm.webp') + ' 450w, ' + m.img + ' 900w" sizes="(max-width: 760px) 92vw, (max-width: 1100px) 44vw, 300px" alt="Piscina ' + m.name + '" loading="lazy" width="900" height="600"></div>' +
       '<div class="mcard__body">' +
         '<div class="mcard__top"><h3>' + m.name + '</h3><span class="badge badge--size">' + m.size + '</span>' + (m.badge ? '<span class="badge">' + m.badge + '</span>' : '') +
-        '<span class="mcard__go" aria-hidden="true">' + ARROW + '</span></div>' +
+        '<button type="button" class="mcard__go" aria-label="Ver ficha de ' + m.name + '">' + ARROW + '</button></div>' +
         '<p>' + m.desc + '</p>' +
         '<p class="mcard__price"><small>Desde</small> ' + clp(m.prices[0]) + '</p>' +
         '<div class="mcard__specs">' + specs(m) + '</div>' +
@@ -305,10 +301,6 @@
   grid.addEventListener('click', function (e) {
     var card = e.target.closest('.mcard');
     if (card) openModal(Number(card.dataset.i));
-  });
-  grid.addEventListener('keydown', function (e) {
-    var card = e.target.closest('.mcard');
-    if (card && (e.target === card) && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openModal(Number(card.dataset.i)); }
   });
   q('.feat__cta').addEventListener('click', function () { openModal(featIdx); });
 
@@ -567,7 +559,7 @@
     gsap.timeline()
       .to(prog, { v: 100, duration: 0.5, ease: 'power2.out', onUpdate: renderLoader })
       .to(loader, { yPercent: -100, duration: 1, ease: 'power3.inOut' }, '+=0.15')
-      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); }, '-=0.5')
+      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); try { vid.preload = 'auto'; vid.load(); } catch (e) {} }, '-=0.5')
       .add(heroIntro(), '-=0.55')
       .to('.wa', { scale: 1, duration: 0.6, ease: 'back.out(1.7)' }, '-=0.6')
       .add(function () { waveLoop.kill(); loader.remove(); });
@@ -692,7 +684,7 @@
       });
 
       /* ---- MODELOS ---- */
-      var ch = SplitText.create('.cat__top .cat__h2 > span', { type: 'words', mask: 'words' });
+      var ch = SplitText.create('.cat__top .cat__h2 > span', { type: 'words', mask: 'words', aria: 'none' });
       var ctl = gsap.timeline({ scrollTrigger: { trigger: '.cat', start: 'top 70%' } });
       ctl.from('.cat__top .cat__eyebrow', { autoAlpha: 0, y: 14, duration: 0.8 }, 0)
          .from(ch.words, { yPercent: 110, duration: 1.1, stagger: 0.05 }, 0.1)
