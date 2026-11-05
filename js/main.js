@@ -100,7 +100,7 @@
   var seqEl = q('.seq');
   var frames = qa('.seq__f');
   var hots = qa('.hot');
-  var SEQ_RATIO = 1912 / 1308;
+  var SEQ_RATIO = 1280 / 720;
   var bgs = qa('.seq__bg');
   function fitSeq() {
     // escritorio: el cuadro entero (contain), con el mismo cuadro desenfocado de fondo; vertical: cover
@@ -607,12 +607,12 @@
       gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
-          trigger: '.hero', start: 'top top', end: '+=200%', pin: true, scrub: 0.25, anticipatePin: 1,
+          trigger: '.hero', start: 'top top', end: '+=260%', pin: true, scrub: 0.25, anticipatePin: 1,
           onToggle: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); },
           onRefresh: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); }
         }
       })
-        .to(heroSt, { p: 7, duration: 0.86, onUpdate: function () { showFrame(heroSt.p); } }, 0)
+        .to(heroSt, { p: frames.length - 1, duration: 0.86, onUpdate: function () { showFrame(heroSt.p); } }, 0)
         .to('.hero__exit', { autoAlpha: 1, duration: 0.14, ease: 'power1.in' }, 0.86);
       if (!window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
 
