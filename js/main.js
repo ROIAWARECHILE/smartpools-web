@@ -89,35 +89,47 @@
     window.addEventListener('pointermove', function (e) {
       xTo(e.clientX); yTo(e.clientY);
       cursor.classList.add('is-on');
-      cursor.classList.toggle('is-water', !!(water.hero.isWaterAt && water.hero.isWaterAt(e.clientX, e.clientY)));
     }, { passive: true });
     document.addEventListener('pointerover', function (e) {
       cursor.classList.toggle('is-link', !!e.target.closest('a, button, input, select, textarea'));
     });
   }
 
-  /* ---------------- ondas en el hero ---------------- */
-  (function heroInput() {
-    var heroEl = q('.hero');
-    var hint = q('.hero__hint-text');
-    if (!finePointer) hint.textContent = 'Toca el agua';
-    var last = { x: -999, y: -999, t: 0 };
-    var touched = false;
-    function onTouched() {
-      if (touched) return;
-      touched = true;
-      gsap.to('.hero__hint', { autoAlpha: 0, duration: 0.6, delay: 1.2 });
-    }
-    heroEl.addEventListener('pointermove', function (e) {
-      var t = performance.now();
-      var dx = e.clientX - last.x, dy = e.clientY - last.y;
-      if (dx * dx + dy * dy < 30 * 30 && t - last.t < 160) return;
-      if (water.hero.ripple && water.hero.ripple(e.clientX, e.clientY, 0.5)) { last = { x: e.clientX, y: e.clientY, t: t }; onTouched(); }
-    }, { passive: true });
-    heroEl.addEventListener('pointerdown', function (e) {
-      if (water.hero.ripple && water.hero.ripple(e.clientX, e.clientY, 1.3)) onTouched();
-    }, { passive: true });
-  })();
+  /* ---------------- hero: secuencia de cuadros ---------------- */
+  var heroEl = q('.hero');
+  var seqEl = q('.seq');
+  var frames = qa('.seq__f');
+  var hots = qa('.hot');
+  var SEQ_RATIO = 1912 / 1308;
+  var bgs = qa('.seq__bg');
+  function fitSeq() {
+    // escritorio: el cuadro entero (contain), con el mismo cuadro desenfocado de fondo; vertical: cover
+    var W = heroEl.clientWidth, H = heroEl.clientHeight, w, h;
+    var portrait = W < H;
+    if ((W / H > SEQ_RATIO) !== portrait) { h = H; w = H * SEQ_RATIO; } else { w = W; h = W / SEQ_RATIO; }
+    seqEl.style.width = w + 'px'; seqEl.style.height = h + 'px';
+    seqEl.style.left = (W - w) / 2 + 'px'; seqEl.style.top = (H - h) / 2 + 'px';
+  }
+  fitSeq();
+  window.addEventListener('resize', fitSeq);
+  var curFrame = -1;
+  function showFrame(f) {
+    // f es continuo: fundido entre el cuadro entero más cercano y el siguiente
+    frames.forEach(function (img, k) { var o = Math.max(0, Math.min(1, 1 - Math.abs(f - k))); img.style.opacity = o; if (bgs[k]) bgs[k].style.opacity = o; });
+    var n = Math.round(f);
+    if (n === curFrame) return;
+    curFrame = n;
+    hots.forEach(function (a) {
+      var r = a.dataset.f.split('-');
+      a.classList.toggle('is-live', n >= Number(r[0]) && n <= Number(r[1]));
+    });
+  }
+  showFrame(0);
+  var heroReadyPromise = new Promise(function (res) {
+    var first = frames[0];
+    if (first.complete) res(); else { first.addEventListener('load', res, { once: true }); first.addEventListener('error', res, { once: true }); }
+  });
+  frames.forEach(function (img) { if (img.decode) img.decode().catch(function () {}); });
 
   /* ---------------- catálogo de modelos ---------------- */
   // Medidas, tamaños y precios tomados de las fichas técnicas (láminas) de Smart Pools.
@@ -557,7 +569,7 @@
   bump(12);
 
   var fontsReady = (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { bump(45); });
-  var heroReady = water.hero.readyPromise.then(function () { bump(85); });
+  var heroReady = heroReadyPromise.then(function () { bump(85); });
   var timeout = new Promise(function (res) { setTimeout(res, 4500); });
 
   Promise.race([Promise.all([fontsReady, heroReady]), timeout]).then(function () {
@@ -578,15 +590,9 @@
   });
 
   function heroIntro() {
-    var split = SplitText.create('.hero__title', { type: 'words', mask: 'words' });
     return gsap.timeline()
-      .from('.hero__media', { scale: 1.14, duration: 2, ease: 'power2.out' }, 0)
-      .from('.hero__eyebrow', { autoAlpha: 0, y: 14, duration: 0.9 }, 0.25)
-      .from(split.words, { yPercent: 115, duration: 1.2, stagger: 0.07 }, 0.3)
-      .from('.hero__btn', { autoAlpha: 0, y: 18, duration: 0.9 }, 0.75)
-      .from('.nav', { autoAlpha: 0, duration: 0.9 }, 0.5)
-      .from('.gcard', { autoAlpha: 0, y: 46, duration: 1, stagger: 0.09 }, 0.8)
-      .from('.hero__hint > *', { autoAlpha: 0, duration: 0.6, stagger: 0.1 }, 1.4);
+      .from('.seq', { scale: 1.06, autoAlpha: 0, duration: 1.4, ease: 'power2.out' }, 0)
+      .from('.nav', { autoAlpha: 0, duration: 0.9 }, 0.5);
   }
 
   /* ---------------- todas las animaciones de scroll ---------------- */
@@ -595,49 +601,20 @@
 
     mm.add('(prefers-reduced-motion: no-preference)', function () {
 
-      /* ---- HERO: la cámara se sumerge y quedamos bajo el agua ----
-         Tiempo del timeline = 1 unidad. Sin zonas muertas: el texto se va mientras
-         empieza a subir el agua, se lee el contenido sumergido y al final "emergemos"
-         hacia la luz de la sección de modelos. */
-      var heroTl = gsap.timeline({
+      /* ---- HERO: los 8 cuadros del GIF, uno tras otro, movidos por el scroll ---- */
+      var nav = q('.nav');
+      var heroSt = { p: 0 };
+      gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
-          trigger: '.hero', start: 'top top', end: '+=210%', pin: true, scrub: 0.4, anticipatePin: 1,
-          onUpdate: function (s) { water.boostBubbles(Math.abs(s.getVelocity()) / 1500); }
+          trigger: '.hero', start: 'top top', end: '+=200%', pin: true, scrub: 0.25, anticipatePin: 1,
+          onToggle: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); },
+          onRefresh: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); }
         }
-      });
-      // la cámara baja hasta el ras del agua: el título se achica y sube, las tarjetas quedan sumergidas
-      heroTl
-        .to('.hero__eyebrow', { autoAlpha: 0, y: -10, duration: 0.1 }, 0)
-        .to('.hero__hint', { autoAlpha: 0, duration: 0.06 }, 0)
-        .to('.hero__content', { y: function () { return -window.innerHeight * 0.1; }, duration: 0.42, ease: 'power1.inOut' }, 0)
-        .to('.hero__shade', { autoAlpha: 0, duration: 0.25 }, 0.08)
-        .to('.hero__cards', { autoAlpha: 0, duration: 0.07, ease: 'power1.in' }, 0.4)
-        .to('.hero__content', { autoAlpha: 0, duration: 0.07, ease: 'power1.in' }, 0.43);
-      if (water.hero.ok) {
-        heroTl
-          .to(water.state, { zoom: 1, duration: 0.5, ease: 'power1.out' }, 0)
-          .to(water.state, { rise: 1, duration: 0.42, ease: 'power1.inOut' }, 0.1);
-      } else {
-        // sin WebGL: la foto bajo el agua sube como una cortina
-        var underImg = document.createElement('img');
-        underImg.className = 'hero__underimg';
-        underImg.src = 'assets/img/underwater.jpg';
-        underImg.alt = '';
-        q('.hero__media').insertBefore(underImg, q('.hero__shade'));
-        heroTl
-          .to('.hero__img', { scale: 1.14, duration: 0.5 }, 0)
-          .fromTo(underImg, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.42, ease: 'power1.inOut' }, 0.1);
-      }
-      heroTl
-        .to('.hero__deep', { autoAlpha: 1, duration: 0.14 }, 0.44)
-        .fromTo('.under__intro > *', { y: 50, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.14, stagger: 0.04, ease: 'power2.out' }, 0.5)
-        .fromTo('.under__head', { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.14, ease: 'power2.out' }, 0.6)
-        .fromTo('.dcard', { y: 70, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.16, stagger: 0.04, ease: 'power2.out' }, 0.64)
-        // emerger: el contenido sube despacio y la escena se aclara hacia el tono de la siguiente sección
-        .to('.under', { y: -60, duration: 0.2, ease: 'power1.in' }, 0.8)
-        .to('.hero__exit', { autoAlpha: 1, duration: 0.2, ease: 'power1.in' }, 0.8)
-        .to('.under', { autoAlpha: 0, duration: 0.12, ease: 'power1.in' }, 0.88);
+      })
+        .to(heroSt, { p: 7, duration: 0.86, onUpdate: function () { showFrame(heroSt.p); } }, 0)
+        .to('.hero__exit', { autoAlpha: 1, duration: 0.14, ease: 'power1.in' }, 0.86);
+      if (!window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
 
       /* ---- MODELOS ---- */
       var ch = SplitText.create('.cat__top .cat__h2 > span', { type: 'words', mask: 'words' });
