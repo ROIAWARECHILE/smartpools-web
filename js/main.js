@@ -43,7 +43,11 @@
     lenis.stop();
   }
 
+  function heroGated() { return document.documentElement.classList.contains('is-gated'); }
+  var heroDescend = null; // la define el bloque del hero
+
   function scrollToTarget(target) {
+    if (heroGated() && heroDescend) { heroDescend(function () { scrollToTarget(target); }); return; }
     if (lenis) lenis.scrollTo(target, { offset: typeof target === 'number' ? 0 : -8, duration: 1.6, easing: function (t) { return 1 - Math.pow(1 - t, 4); } });
     else if (typeof target === 'number') window.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
     else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
@@ -65,7 +69,7 @@
     burger.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
     menu.setAttribute('aria-hidden', String(!open));
     if (open) { menuTl.timeScale(1).play(); if (lenis) lenis.stop(); }
-    else { menuTl.timeScale(1.6).reverse(); if (lenis) lenis.start(); }
+    else { menuTl.timeScale(1.6).reverse(); if (lenis && !heroGated()) lenis.start(); }
   }
   burger.addEventListener('click', function () { setMenu(!menuOpen); });
 
@@ -449,7 +453,7 @@
     modalOpen = false;
     body.classList.remove('modal-open');
     modal.setAttribute('aria-hidden', 'true');
-    if (lenis) lenis.start();
+    if (lenis && !heroGated()) lenis.start();
     gsap.timeline()
       .to('.modal__card', { autoAlpha: 0, y: 30, scale: 0.96, duration: reduce ? 0 : 0.35, ease: 'power2.in' }, 0)
       .to('.modal__backdrop', { autoAlpha: 0, duration: 0.35 }, 0.05)
@@ -583,7 +587,7 @@
     gsap.timeline()
       .to(prog, { v: 100, duration: 0.5, ease: 'power2.out', onUpdate: renderLoader })
       .to(loader, { yPercent: -100, duration: 1, ease: 'power3.inOut' }, '+=0.15')
-      .add(function () { body.classList.remove('is-loading'); if (lenis) lenis.start(); }, '-=0.5')
+      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); }, '-=0.5')
       .add(heroIntro(), '-=0.55')
       .to('.wa', { scale: 1, duration: 0.6, ease: 'back.out(1.7)' }, '-=0.6')
       .add(function () { waveLoop.kill(); loader.remove(); });
@@ -601,19 +605,70 @@
 
     mm.add('(prefers-reduced-motion: no-preference)', function () {
 
-      /* ---- HERO: los 8 cuadros del GIF, uno tras otro, movidos por el scroll ---- */
+      /* ---- HERO: un solo scroll baja al fondo de la piscina; la secuencia se reproduce sola ---- */
       var nav = q('.nav');
       var heroSt = { p: 0 };
-      gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: '.hero', start: 'top top', end: '+=260%', pin: true, scrub: 0.25, anticipatePin: 1,
-          onToggle: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); },
-          onRefresh: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); }
-        }
+      var LAST = frames.length - 1;
+      var descended = false, moving = false, topSince = null, afterDescend = null;
+      function gate(on) {
+        document.documentElement.classList.toggle('is-gated', on);
+        if (lenis) { if (on) lenis.stop(); else lenis.start(); }
+      }
+      function atTop() { return (lenis ? lenis.scroll : window.scrollY) < 4; }
+      // ritmo del descenso: breve espera en la superficie, cruce del agua y asentamiento en el fondo
+      var dive = gsap.timeline({
+        paused: true,
+        onUpdate: function () { showFrame(heroSt.p); },
+        onComplete: function () {
+          descended = true; moving = false; gate(false); topSince = performance.now();
+          if (afterDescend) { var cb = afterDescend; afterDescend = null; cb(); }
+        },
+        onReverseComplete: function () { descended = false; moving = false; }
       })
-        .to(heroSt, { p: frames.length - 1, duration: 0.86, onUpdate: function () { showFrame(heroSt.p); } }, 0)
-        .to('.hero__exit', { autoAlpha: 1, duration: 0.14, ease: 'power1.in' }, 0.86);
+        .to(heroSt, { p: 19, duration: 0.55, ease: 'none' })
+        .to(heroSt, { p: 28, duration: 1.25, ease: 'power1.inOut' })
+        .to(heroSt, { p: LAST, duration: 1.7, ease: 'power1.out' });
+      function descend(cb) {
+        if (descended) { if (cb) cb(); return; }
+        if (cb) afterDescend = cb;
+        if (moving) return;
+        moving = true; gate(true); dive.timeScale(1).play();
+      }
+      function ascend() {
+        if (moving || !descended) return;
+        moving = true; gate(true); dive.timeScale(1.35).reverse();
+      }
+      heroDescend = descend;
+      gate(true); // la página no baja hasta que el visitante haga su primer scroll
+      function restingAtTop() { return descended && !moving && atTop() && topSince !== null && performance.now() - topSince > 400; }
+      gsap.ticker.add(function () {
+        if (atTop()) { if (topSince === null) topSince = performance.now(); } else topSince = null;
+      });
+      window.addEventListener('wheel', function (e) {
+        if (menuOpen || modalOpen) return;
+        if (!descended && atTop()) { e.preventDefault(); if (e.deltaY > 6) descend(); }
+        else if (restingAtTop() && e.deltaY < -6) { e.preventDefault(); ascend(); }
+      }, { passive: false });
+      var touchY = null;
+      window.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
+      window.addEventListener('touchmove', function (e) {
+        if (touchY === null || menuOpen || modalOpen) return;
+        var dy = touchY - e.touches[0].clientY;
+        if (!descended && atTop()) { if (dy > 24) { touchY = null; descend(); } }
+        else if (restingAtTop() && dy < -40) { touchY = null; ascend(); }
+      }, { passive: true });
+      window.addEventListener('keydown', function (e) {
+        if (menuOpen || modalOpen || e.target.closest('input, textarea, select')) return;
+        var down = ['ArrowDown', 'PageDown', 'End', ' '].indexOf(e.key) >= 0, up = ['ArrowUp', 'PageUp', 'Home'].indexOf(e.key) >= 0;
+        if (!descended && atTop() && down) { e.preventDefault(); descend(); }
+        else if (restingAtTop() && up) { e.preventDefault(); ascend(); }
+      });
+      // la nav real se esconde mientras el video (que trae su propio menú) está en pantalla
+      ScrollTrigger.create({
+        trigger: '.hero', start: 'top top', end: 'bottom top',
+        onToggle: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); },
+        onRefresh: function (st) { nav.classList.toggle('nav--inhero', st.isActive && !menuOpen); }
+      });
       if (!window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
 
       /* ---- MODELOS ---- */
