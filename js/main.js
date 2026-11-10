@@ -559,7 +559,7 @@
     gsap.timeline()
       .to(prog, { v: 100, duration: 0.5, ease: 'power2.out', onUpdate: renderLoader })
       .to(loader, { yPercent: -100, duration: 1, ease: 'power3.inOut' }, '+=0.15')
-      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); try { vid.preload = 'auto'; vid.load(); } catch (e) {} }, '-=0.5')
+      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); try { if (window.matchMedia('(max-width: 760px)').matches) vid.src = 'assets/video/inmersion-sd.mp4'; vid.preload = 'auto'; vid.load(); } catch (e) {} }, '-=0.5')
       .add(heroIntro(), '-=0.55')
       .to('.wa', { scale: 1, duration: 0.6, ease: 'back.out(1.7)' }, '-=0.6')
       .add(function () { waveLoop.kill(); loader.remove(); });
