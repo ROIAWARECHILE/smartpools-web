@@ -87,6 +87,8 @@
 
   /* ---------------- hero: video de la inmersión ---------------- */
   var heroEl = q('.hero');
+  // el video del descenso solo en pantallas horizontales; en vertical, foto real con texto
+  var videoHero = !window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
   var seqEl = q('.seq');
   var vid = q('.seq__video');
   var poster = q('.seq__poster');
@@ -111,7 +113,8 @@
   }
   setPhase('surface');
   var heroReadyPromise = new Promise(function (res) {
-    if (poster.complete) res(); else { poster.addEventListener('load', res, { once: true }); poster.addEventListener('error', res, { once: true }); }
+    var first = videoHero ? poster : q('.hero__m-bg');
+    if (first.complete) res(); else { first.addEventListener('load', res, { once: true }); first.addEventListener('error', res, { once: true }); }
   });
 
   /* ---------------- catálogo de modelos ---------------- */
@@ -234,6 +237,7 @@
         '<button type="button" class="mcard__go" aria-label="Ver ficha de ' + m.name + '">' + ARROW + '</button></div>' +
         '<p>' + m.desc + '</p>' +
         '<p class="mcard__price"><small>Desde</small> ' + clp(m.prices[0]) + '</p>' +
+        '<a class="mcard__quote" href="#contacto" data-model="' + m.name + '">Cotizar este modelo ' + ARROW + '</a>' +
         '<div class="mcard__specs">' + specs(m) + '</div>' +
       '</div>';
     grid.appendChild(a);
@@ -299,6 +303,8 @@
   q('.cat__top').addEventListener('pointerleave', function () { hovering = false; restartAuto(); });
 
   grid.addEventListener('click', function (e) {
+    var qlink = e.target.closest('.mcard__quote');
+    if (qlink) { var sel = q('.form__model'); if (sel) sel.value = qlink.dataset.model; return; }
     var card = e.target.closest('.mcard');
     if (card) openModal(Number(card.dataset.i));
   });
@@ -470,65 +476,125 @@
     });
   });
 
-  /* ---------------- formulario ---------------- */
+  /* ---------------- formulario de cotización (2 pasos) ---------------- */
   var form = q('.form');
   var errBox = document.createElement('p');
   errBox.className = 'form__error';
   errBox.setAttribute('role', 'alert');
-  form.insertBefore(errBox, q('.form__submit'));
-  function showDone(msg) {
+  var actions = q('.form__actions'); actions.parentNode.insertBefore(errBox, actions);
+  var steps = qa('.form__step'), stepTabs = qa('.form__steps span'), progress = q('.form__progress');
+  function goStep(n) {
+    steps.forEach(function (st) { var on = Number(st.dataset.step) === n; st.hidden = !on; st.classList.toggle('is-on', on); });
+    stepTabs.forEach(function (t, k) { t.classList.toggle('is-on', k < n); });
+    progress.textContent = 'Paso ' + n + ' de 2';
+    var first = q('.form__step[data-step="' + n + '"] input:not([type="radio"]), .form__step[data-step="' + n + '"] select');
+    if (first && n === 2) first.focus();
+  }
+  // celular: solo dígitos, con espacio a la mitad (1234 5678)
+  var tel = form.elements.telefono;
+  tel.addEventListener('input', function () {
+    var d = tel.value.replace(/\D/g, '');
+    if (d.length > 8 && d.indexOf('569') === 0) d = d.slice(3);
+    if (d.length > 8 && d.charAt(0) === '9') d = d.slice(1);
+    d = d.slice(0, 8);
+    tel.value = d.length > 4 ? d.slice(0, 4) + ' ' + d.slice(4) : d;
+  });
+  var RULES = {
+    comuna: function (v) { return v.length >= 2; },
+    nombre: function (v) { return v.length >= 2; },
+    telefono: function (v) { return v.replace(/\D/g, '').length === 8; },
+    correo: function (v) { return v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  };
+  function check(name) {
+    var input = form.elements[name];
+    var ok = RULES[name](input.value.trim());
+    input.closest('.field').classList.toggle('is-invalid', !ok);
+    input.setAttribute('aria-invalid', ok ? 'false' : 'true');
+    return ok;
+  }
+  // se valida al salir del campo, nunca mientras se escribe; una vez marcado, se limpia al corregir
+  Object.keys(RULES).forEach(function (n) {
+    var input = form.elements[n];
+    input.addEventListener('blur', function () { if (input.value.trim() !== '' || n !== 'correo') check(n); });
+    input.addEventListener('input', function () { if (input.closest('.field').classList.contains('is-invalid')) check(n); });
+  });
+  function shake(els) { gsap.fromTo(els, { x: 0 }, { keyframes: { x: [-8, 8, -6, 6, 0] }, duration: 0.4, ease: 'none' }); }
+  q('.form__next').addEventListener('click', function () {
+    if (!check('comuna')) { shake(form.elements.comuna.closest('.field')); form.elements.comuna.focus(); return; }
+    goStep(2);
+  });
+  q('.form__back').addEventListener('click', function () { goStep(1); });
+  function radio(name) { var r = form.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
+  var lastText = '';
+  function showDone(title, msg, text) {
+    q('.form__done-title').textContent = title;
     q('.form__done-msg').textContent = msg;
+    q('.form__done-wa').href = waUrl(text);
+    q('.form__done-mail').href = 'mailto:contacto@smartpools.cl?subject=' + encodeURIComponent('Cotización de piscina') + '&body=' + encodeURIComponent(text);
     var done = q('.form__done');
     gsap.timeline()
       .to(done, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' })
       .fromTo(qa('.form__done circle, .form__done path'), { drawSVG: 0 }, { drawSVG: '100%', duration: 0.6, stagger: 0.15, ease: 'power2.inOut' }, 0.1)
-      .from('.form__done p, .form__again', { y: 12, autoAlpha: 0, duration: 0.5, stagger: 0.1 }, 0.5);
+      .from('.form__done p, .form__done-ctas, .form__again', { y: 12, autoAlpha: 0, duration: 0.5, stagger: 0.1 }, 0.5);
   }
   q('.form__again').addEventListener('click', function () {
     form.reset();
+    goStep(1);
     gsap.to('.form__done', { autoAlpha: 0, duration: 0.3 });
-    form.elements.nombre.focus();
+    form.elements.modelo.focus();
   });
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (form.elements.empresa.value) return;   // honeypot: lo llenan los bots
     errBox.classList.remove('is-on');
     var bad = [];
-    ['nombre', 'telefono', 'correo'].forEach(function (n) {
-      var input = form.elements[n];
-      var v = input.value.trim();
-      var ok = v !== '' && (n !== 'correo' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) && (n !== 'telefono' || v.replace(/\D/g, '').length >= 8);
-      input.closest('.field').classList.toggle('is-invalid', !ok);
-      if (!ok) bad.push(input.closest('.field'));
-    });
+    ['nombre', 'telefono', 'correo'].forEach(function (n) { if (!check(n)) bad.push(form.elements[n].closest('.field')); });
     var consent = form.elements.acepta;
     consent.closest('.check').classList.toggle('is-invalid', !consent.checked);
     if (!consent.checked) bad.push(consent.closest('.check'));
     if (bad.length) {
-      gsap.fromTo(bad, { x: 0 }, { keyframes: { x: [-8, 8, -6, 6, 0] }, duration: 0.4, ease: 'none' });
+      errBox.textContent = consent.checked ? 'Revisa los campos marcados.' : 'Revisa los campos marcados y acepta el uso de tus datos para poder responderte.';
+      errBox.classList.add('is-on');
+      shake(bad);
       (bad[0].querySelector('input') || bad[0]).focus();
       return;
     }
     var data = {
-      nombre: form.elements.nombre.value.trim(), telefono: form.elements.telefono.value.trim(),
+      nombre: form.elements.nombre.value.trim(), telefono: '+56 9 ' + form.elements.telefono.value.trim(),
       correo: form.elements.correo.value.trim(), comuna: form.elements.comuna.value.trim(),
-      modelo: form.elements.modelo.value || 'Aún no lo sé', mensaje: form.elements.mensaje.value.trim()
+      modelo: form.elements.modelo.value || 'Aún no lo sé', proyecto: radio('proyecto') || 'Aún no lo sé',
+      acceso: radio('acceso') || 'No sé', mensaje: form.elements.mensaje.value.trim()
     };
+    var text = 'Hola, quiero cotizar una piscina.\n' +
+      'Nombre: ' + data.nombre + '\nCelular: ' + data.telefono + (data.correo ? '\nCorreo: ' + data.correo : '') +
+      '\nComuna: ' + data.comuna + '\nModelo: ' + data.modelo + '\nProyecto: ' + data.proyecto +
+      '\nAcceso para camión o grúa: ' + data.acceso + (data.mensaje ? '\nComentarios: ' + data.mensaje : '');
+    var first = data.nombre.split(' ')[0];
     if (CONFIG.formEndpoint) {
       form.classList.add('is-sending');
       fetch(CONFIG.formEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); showDone('Recibimos tu solicitud. Te contactaremos muy pronto.'); form.reset(); })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); showDone('¡Gracias, ' + first + '!', 'Recibimos tu solicitud y te contactaremos muy pronto. Si quieres, adelántanos fotos de tu patio por WhatsApp.', text); })
         .catch(function () { errBox.textContent = 'No pudimos enviar el formulario. Inténtalo de nuevo o escríbenos por WhatsApp.'; errBox.classList.add('is-on'); })
         .then(function () { form.classList.remove('is-sending'); });
     } else {
-      // sin backend: el mensaje viaja por WhatsApp
-      var text = 'Hola, quiero cotizar una piscina.\n' +
-        'Nombre: ' + data.nombre + '\nTeléfono: ' + data.telefono + '\nCorreo: ' + data.correo +
-        (data.comuna ? '\nComuna: ' + data.comuna : '') + '\nModelo: ' + data.modelo + (data.mensaje ? '\nProyecto: ' + data.mensaje : '');
+      // sin servidor: la solicitud viaja por WhatsApp, con el correo como alternativa
       window.open(waUrl(text), '_blank', 'noopener');
-      showDone('Abrimos WhatsApp con tu solicitud lista para enviar.');
+      showDone('¡Listo, ' + first + '!', 'Abrimos WhatsApp con tu solicitud escrita: solo falta tocar enviar. Si no se abrió, usa este botón.', text);
     }
   });
+
+  qa('[data-tier]').forEach(function (a) {
+    a.addEventListener('click', function () { var r = form.querySelector('input[name="proyecto"][value="' + a.dataset.tier + '"]'); if (r) r.checked = true; });
+  });
+
+  /* ---------------- barra fija de cotización (celular) ---------------- */
+  var mbar = q('.mbar');
+  if (mbar && 'IntersectionObserver' in window) {
+    var heroIn = true, contactIn = false;
+    var syncBar = function () { mbar.classList.toggle('is-on', !heroIn && !contactIn); };
+    new IntersectionObserver(function (es) { heroIn = es[0].isIntersecting; syncBar(); }, { rootMargin: '0px 0px -40% 0px' }).observe(q('.hero'));
+    new IntersectionObserver(function (es) { contactIn = es[0].isIntersecting; syncBar(); }, { threshold: 0.15 }).observe(q('.contact'));
+  }
 
   /* ---------------- loader + arranque ---------------- */
   var loader = q('.loader');
@@ -559,7 +625,7 @@
     gsap.timeline()
       .to(prog, { v: 100, duration: 0.5, ease: 'power2.out', onUpdate: renderLoader })
       .to(loader, { yPercent: -100, duration: 1, ease: 'power3.inOut' }, '+=0.15')
-      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); try { if (window.matchMedia('(max-width: 760px)').matches) vid.src = 'assets/video/inmersion-sd.mp4'; vid.preload = 'auto'; vid.load(); } catch (e) {} }, '-=0.5')
+      .add(function () { body.classList.remove('is-loading'); if (lenis && !heroGated()) lenis.start(); if (videoHero) { try { if (window.matchMedia('(max-width: 900px)').matches) vid.src = 'assets/video/inmersion-sd.mp4'; vid.preload = 'auto'; vid.load(); } catch (e) {} } }, '-=0.5')
       .add(heroIntro(), '-=0.55')
       .to('.wa', { scale: 1, duration: 0.6, ease: 'back.out(1.7)' }, '-=0.6')
       .add(function () { waveLoop.kill(); loader.remove(); });
@@ -626,7 +692,8 @@
       }
       vid.addEventListener('ended', finishDescent);
       heroDescend = descend;
-      gate(true); // la página no baja hasta que el visitante haga su primer scroll
+      if (videoHero) gate(true); // la página no baja hasta que el visitante haga su primer scroll
+      else { descended = true; heroDescend = null; }
       function restingAtTop() { return descended && !moving && atTop() && topSince !== null && performance.now() - topSince > 400; }
       gsap.ticker.add(function () {
         if (atTop()) { if (topSince === null) topSince = performance.now(); } else topSince = null;
@@ -654,10 +721,10 @@
       // (el hero es sticky, así que se mide con la sección siguiente, que sí está en el flujo normal)
       ScrollTrigger.create({
         trigger: '.cat', start: 'top 40px', end: 'max',
-        onToggle: function (st) { nav.classList.toggle('nav--inhero', !st.isActive && !menuOpen); },
-        onRefresh: function (st) { nav.classList.toggle('nav--inhero', !st.isActive && !menuOpen); }
+        onToggle: function (st) { nav.classList.toggle('nav--inhero', videoHero && !st.isActive && !menuOpen); },
+        onRefresh: function (st) { nav.classList.toggle('nav--inhero', videoHero && !st.isActive && !menuOpen); }
       });
-      if (!window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
+      if (videoHero && !window.matchMedia('(max-width: 960px)').matches) nav.classList.add('nav--inhero');
 
       ScrollTrigger.create({
         trigger: '.cat', start: 'top top',
@@ -970,7 +1037,7 @@
     });
     // nav clara sobre las secciones claras
     var lightCount = 0;
-    ['.cat', '.adv', '.process', '.faq'].forEach(function (sel) {
+    ['.cat', '.adv', '.cmp', '.process', '.faq'].forEach(function (sel) {
       var sec = q(sel);
       var trg = sec.parentElement.classList.contains('pin-spacer') ? sec.parentElement : sec;
       ScrollTrigger.create({
