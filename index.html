@@ -24,6 +24,7 @@
 
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-latin-wght-normal.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-latin-wght-italic.woff2" crossorigin>
   <style>
     @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url(assets/fonts/cormorant-garamond-latin-wght-normal.woff2) format('woff2-variations'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
     @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url(assets/fonts/cormorant-garamond-latin-wght-italic.woff2) format('woff2-variations'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
@@ -31,8 +32,7 @@
     @font-face { font-family: 'Jakarta Fallback'; src: local('Arial'); size-adjust: 104%; ascent-override: 98%; descent-override: 22%; line-gap-override: 0%; }
   </style>
   <link rel="preload" as="image" href="assets/video/poster.webp" media="(min-width: 761px) and (orientation: landscape), (min-width: 1101px)">
-  <link rel="preload" as="image" href="assets/img/hero-m.webp" imagesrcset="assets/img/hero-m-sm.webp 480w, assets/img/hero-m.webp 760w" imagesizes="100vw" fetchpriority="high" media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)">
-  <link rel="stylesheet" href="css/styles.css?v=20261110f">
+  <link rel="stylesheet" href="css/styles.css?v=20261110j">
 </head>
 <body class="is-loading">
   <a class="skip" href="#modelos">Ir al contenido</a>
@@ -50,6 +50,10 @@
     </svg>
     <div class="loader__meta"><span>Llenando la piscina</span><span class="loader__pct">0%</span></div>
   </div>
+  <script>
+    // en pantallas verticales no hay video: se quita la pantalla de carga antes del primer pintado
+    if (window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches) { document.querySelector('.loader').remove(); document.body.classList.remove('is-loading'); }
+  </script>
 
   <!-- medidor de profundidad = progreso del scroll -->
   <div class="depth" aria-hidden="true">
@@ -90,7 +94,7 @@
     <!-- ============ HERO: un scroll reproduce el video de la inmersión ============ -->
     <section class="hero hero--seq" id="inicio">
       <div class="hero__m">
-        <img class="hero__m-bg" src="assets/img/hero-m.webp" srcset="assets/img/hero-m-sm.webp 480w, assets/img/hero-m.webp 760w" sizes="100vw" alt="" width="760" height="1117" fetchpriority="high">
+        <img class="hero__m-bg" src="assets/img/hero-m.webp" srcset="assets/img/hero-m-sm.webp 480w, assets/img/hero-m.webp 760w" sizes="100vw" alt="" width="760" height="1117" decoding="async">
         <div class="hero__m-body">
           <p class="hero__m-eyebrow">Piscinas de fibra de vidrio reforzado</p>
           <h1 class="hero__title">Tu piscina, <em>más cerca de casa</em></h1>
@@ -112,7 +116,7 @@
       </div>
       <div class="seq" aria-hidden="false">
         <video class="seq__video" src="assets/video/inmersion-v2.mp4" muted playsinline preload="none" width="1280" height="720" aria-label="Piscina Smart Pools: descenso al agua"></video>
-        <img class="seq__poster" src="assets/video/poster.webp" alt="Piscina Smart Pools" width="1280" height="720" fetchpriority="high">
+        <picture><source media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><img class="seq__poster" src="assets/video/poster.webp" alt="Piscina Smart Pools" width="1280" height="720" fetchpriority="high"></picture>
         <a class="hot" data-ph="all" style="--x:33;--y:3.5;--w:6;--h:4.5" href="#modelos" aria-label="Modelos"></a>
         <a class="hot" data-ph="all" style="--x:40.5;--y:3.5;--w:9.5;--h:4.5" href="#fibra" aria-label="Fibra Reforzada"></a>
         <a class="hot" data-ph="all" style="--x:51.5;--y:3.5;--w:7;--h:4.5" href="#inspiracion" aria-label="Inspiración"></a>
@@ -168,7 +172,7 @@
         </div>
 
         <div class="feat">
-          <div class="feat__visual"><img class="feat__img" src="assets/modelos/los-roques-1-card.webp" alt="Piscina Los Roques" width="900" height="600"></div>
+          <div class="feat__visual"><img class="feat__img" loading="lazy" src="assets/modelos/los-roques-1-card.webp" srcset="assets/modelos/los-roques-1-card-sm.webp 450w, assets/modelos/los-roques-1-card.webp 900w" sizes="(max-width: 760px) 92vw, 34vw" alt="Piscina Los Roques" width="900" height="600"></div>
           <div class="feat__info" aria-live="polite">
             <p class="feat__name"><span class="feat__title">Los Roques</span><span class="badge feat__badge">Más vendido</span></p>
             <p class="feat__desc">Diseño equilibrado, elegante y funcional.</p>
@@ -310,7 +314,7 @@
           <h2 class="h2 h2--light">Cinco capas,<br><em>una sola pieza</em></h2>
           <p class="layers__lead">Cada piscina se lamina capa a capa sobre un molde. El resultado es un casco continuo, sin uniones, que combina rigidez y flexibilidad.</p>
           <ol class="layers__list">
-            <li><b>Gelcoat de terminación</b><span>La capa que tocas. Lisa, brillante y con protección UV para que el color dure.</span></li>
+            <li><b>Gelcoat de terminación</b><span>La capa que tocas. Lisa, brillante y con protección UV para que la terminación dure.</span></li>
             <li><b>Barrera de viniléster</b><span>Bloquea la osmosis y protege la estructura del agua y de los químicos.</span></li>
             <li><b>Fibra de vidrio laminada</b><span>Mantas de fibra impregnadas en resina, una sobre otra, que dan la resistencia.</span></li>
             <li><b>Núcleo estructural</b><span>Aporta rigidez sin perder la flexibilidad frente a los movimientos del suelo.</span></li>
@@ -375,7 +379,7 @@
         </svg>
         <ol class="process__steps">
           <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l1 2h2v16H5V5h2z"/><path d="M9 3v3h6V3"/><path d="M8 11h8M8 15h5"/></svg></span><div><span class="step__n">Paso 01</span><h3>Visita y cotización</h3><p>Conversamos sobre tu espacio, medimos el terreno y te enviamos una propuesta clara, sin letra chica.</p></div></li>
-          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M7 7V5M12 7V4M17 7V5"/><circle cx="8" cy="12.5" r="1.3"/><circle cx="12" cy="12.5" r="1.3"/><circle cx="16" cy="12.5" r="1.3"/></svg></span><div><span class="step__n">Paso 02</span><h3>Eliges modelo y color</h3><p>Te ayudamos a escoger la forma, el tamaño y el gelcoat que mejor conversan con tu jardín.</p></div></li>
+          <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M7 7V5M12 7V4M17 7V5"/><circle cx="8" cy="12.5" r="1.3"/><circle cx="12" cy="12.5" r="1.3"/><circle cx="16" cy="12.5" r="1.3"/></svg></span><div><span class="step__n">Paso 02</span><h3>Eliges modelo y proyecto</h3><p>Te ayudamos a escoger la forma, el tamaño y la versión (Estándar, Con Bordes o Climatizado) que mejor aprovecha tu patio.</p></div></li>
           <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v9"/><path d="M8 11h8v3a4 4 0 0 1-8 0z"/><path d="M3 21c3-2 6-2 9 0s6 2 9 0"/></svg></span><div><span class="step__n">Paso 03</span><h3>Excavación y base</h3><p>Preparamos el terreno, nivelamos y construimos una base firme y compactada.</p></div></li>
           <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M6 21V7l9-3"/><path d="M6 10h11"/><path d="M17 10v3"/><circle cx="17" cy="15" r="2"/><rect x="11" y="16" width="8" height="5" rx="1.5"/></svg></span><div><span class="step__n">Paso 04</span><h3>Instalación de la piscina</h3><p>La piscina llega en una sola pieza, se posiciona con grúa y se nivela con precisión.</p></div></li>
           <li class="step"><span class="step__badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/></svg></span><div><span class="step__n">Paso 05</span><h3>Llenado y entrega</h3><p>Conectamos la filtración, llenamos y te enseñamos todo lo necesario. Solo queda lanzarse.</p></div></li>
@@ -663,13 +667,13 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-  <script src="js/main.js?v=20261110f"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script src="js/main.js?v=20261110j" defer></script>
 </body>
 </html>
