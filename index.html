@@ -38,7 +38,7 @@
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261113c'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261113e'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -137,7 +137,7 @@
       </div>
       <div class="seq" aria-hidden="false">
         <video class="seq__video" src="assets/video/dive-hd.mp4" muted playsinline preload="none" width="1920" height="1080" aria-label="Piscina Smart Pools: descenso al agua"></video>
-        <video class="seq__loop" muted loop playsinline preload="none" width="1920" height="1080" aria-hidden="true"></video>
+        <canvas class="seq__loop" width="1920" height="1080" aria-hidden="true"></canvas>
         <picture><source media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><img class="seq__poster" src="assets/video/poster-dive.webp" alt="Piscina Smart Pools" width="1920" height="1080" fetchpriority="high"></picture>
       </div>
       <div class="bubbles" aria-hidden="true">
