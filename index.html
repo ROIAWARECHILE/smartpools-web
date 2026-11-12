@@ -31,8 +31,8 @@
     @font-face { font-family: 'Plus Jakarta Sans'; font-style: normal; font-weight: 200 800; font-display: swap; src: url(assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2) format('woff2-variations'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
     @font-face { font-family: 'Jakarta Fallback'; src: local('Arial'); size-adjust: 104%; ascent-override: 98%; descent-override: 22%; line-gap-override: 0%; }
   </style>
-  <link rel="preload" as="image" href="assets/video/poster.webp" media="(min-width: 761px) and (orientation: landscape), (min-width: 1101px)">
-  <link rel="stylesheet" href="css/styles.css?v=20261110j">
+  <link rel="preload" as="image" href="assets/video/poster-hd.webp" media="(min-width: 761px) and (orientation: landscape), (min-width: 1101px)">
+  <link rel="stylesheet" href="css/styles.css?v=20261112a">
 </head>
 <body class="is-loading">
   <a class="skip" href="#modelos">Ir al contenido</a>
@@ -64,7 +64,7 @@
 
   <!-- ============ NAVEGACIÓN ============ -->
   <header class="nav">
-    <a class="nav__logo" href="#inicio" aria-label="Smart Pools, inicio"><b>SMART</b> POOLS</a>
+    <a class="nav__logo" href="#inicio" aria-label="Smart Pools, inicio"><img class="nav__logo-light" src="assets/img/logo-light.png" alt="Smart Pools" width="1014" height="156"><img class="nav__logo-dark" src="assets/img/logo-dark.png" alt="" width="1014" height="156"></a>
     <nav class="nav__links" aria-label="Principal">
       <a href="#modelos">Modelos</a>
       <a href="#fibra">Fibra Reforzada</a>
@@ -115,13 +115,8 @@
         <img class="seq__bg seq__bg--deep" src="assets/video/bg-fondo.webp" alt="">
       </div>
       <div class="seq" aria-hidden="false">
-        <video class="seq__video" src="assets/video/inmersion-v2.mp4" muted playsinline preload="none" width="1280" height="720" aria-label="Piscina Smart Pools: descenso al agua"></video>
-        <picture><source media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><img class="seq__poster" src="assets/video/poster.webp" alt="Piscina Smart Pools" width="1280" height="720" fetchpriority="high"></picture>
-        <a class="hot" data-ph="all" style="--x:33;--y:3.5;--w:6;--h:4.5" href="#modelos" aria-label="Modelos"></a>
-        <a class="hot" data-ph="all" style="--x:40.5;--y:3.5;--w:9.5;--h:4.5" href="#fibra" aria-label="Fibra Reforzada"></a>
-        <a class="hot" data-ph="all" style="--x:51.5;--y:3.5;--w:7;--h:4.5" href="#inspiracion" aria-label="Inspiración"></a>
-        <a class="hot" data-ph="all" style="--x:60.3;--y:3.5;--w:6;--h:4.5" href="#contacto" aria-label="Contacto"></a>
-        <a class="hot" data-ph="all" style="--x:75.5;--y:2.5;--w:15;--h:6" href="#contacto" aria-label="Cotiza tu piscina"></a>
+        <video class="seq__video" src="assets/video/inmersion-hd.mp4" muted playsinline preload="none" width="1280" height="720" aria-label="Piscina Smart Pools: descenso al agua"></video>
+        <picture><source media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><img class="seq__poster" src="assets/video/poster-hd.webp" alt="Piscina Smart Pools" width="1920" height="1080" fetchpriority="high"></picture>
         <a class="hot" data-ph="surface" style="--x:43;--y:52.5;--w:14;--h:7" href="#modelos" aria-label="Ver modelos"></a>
         <a class="hot" data-ph="surface" style="--x:19;--y:74;--w:20;--h:21" href="#ventajas" aria-label="Ventajas del Fiberglass"></a>
         <a class="hot" data-ph="surface" style="--x:40;--y:74;--w:20;--h:21" href="#catalogo" aria-label="Diseños de Piscina"></a>
@@ -149,6 +144,7 @@
         <span style="--x:51;--s:6;--d:0.55"></span>
         <span style="--x:12;--s:16;--d:0.06"></span>
       </div>
+      <div class="hero__scrim" aria-hidden="true"></div>
       <div class="hero__exit"></div>
     </section>
 
@@ -674,6 +670,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=20261110j" defer></script>
+  <script src="js/main.js?v=20261112a" defer></script>
 </body>
 </html>
