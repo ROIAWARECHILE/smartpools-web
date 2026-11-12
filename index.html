@@ -31,8 +31,8 @@
     @font-face { font-family: 'Plus Jakarta Sans'; font-style: normal; font-weight: 200 800; font-display: swap; src: url(assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2) format('woff2-variations'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
     @font-face { font-family: 'Jakarta Fallback'; src: local('Arial'); size-adjust: 104%; ascent-override: 98%; descent-override: 22%; line-gap-override: 0%; }
   </style>
-  <link rel="preload" as="image" href="assets/video/poster-hd.webp" media="(min-width: 761px) and (orientation: landscape), (min-width: 1101px)">
-  <link rel="stylesheet" href="css/styles.css?v=20261112a">
+  <link rel="preload" as="image" href="assets/video/poster-dive.webp" media="(min-width: 761px) and (orientation: landscape), (min-width: 1101px)">
+  <link rel="stylesheet" href="css/styles.css?v=20261112b">
 </head>
 <body class="is-loading">
   <a class="skip" href="#modelos">Ir al contenido</a>
@@ -111,20 +111,12 @@
         </div>
       </div>
       <div class="seq__back" aria-hidden="true">
-        <img class="seq__bg seq__bg--surface" src="assets/video/bg-superficie.webp" alt="">
-        <img class="seq__bg seq__bg--deep" src="assets/video/bg-fondo.webp" alt="">
+        <img class="seq__bg seq__bg--surface" src="assets/video/bg-dive-sup.webp" alt="">
+        <img class="seq__bg seq__bg--deep" src="assets/video/bg-dive-fondo.webp" alt="">
       </div>
       <div class="seq" aria-hidden="false">
-        <video class="seq__video" src="assets/video/inmersion-hd.mp4" muted playsinline preload="none" width="1280" height="720" aria-label="Piscina Smart Pools: descenso al agua"></video>
-        <picture><source media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><img class="seq__poster" src="assets/video/poster-hd.webp" alt="Piscina Smart Pools" width="1920" height="1080" fetchpriority="high"></picture>
-        <a class="hot" data-ph="surface" style="--x:43;--y:52.5;--w:14;--h:7" href="#modelos" aria-label="Ver modelos"></a>
-        <a class="hot" data-ph="surface" style="--x:19;--y:74;--w:20;--h:21" href="#ventajas" aria-label="Ventajas del Fiberglass"></a>
-        <a class="hot" data-ph="surface" style="--x:40;--y:74;--w:20;--h:21" href="#catalogo" aria-label="Diseños de Piscina"></a>
-        <a class="hot" data-ph="surface" style="--x:61;--y:74;--w:20;--h:21" href="#inspiracion" aria-label="Instalaciones Reales"></a>
-        <a class="hot" data-ph="deep" style="--x:68;--y:68;--w:22;--h:5" href="#ventajas" aria-label="Ver todas las características"></a>
-        <a class="hot" data-ph="deep" style="--x:17.5;--y:83;--w:20.5;--h:12" href="#catalogo" aria-label="Escalones integrados"></a>
-        <a class="hot" data-ph="deep" style="--x:40;--y:83;--w:20;--h:12" href="#fibra" aria-label="Interior celeste"></a>
-        <a class="hot" data-ph="deep" style="--x:62.3;--y:83;--w:20;--h:12" href="#inspiracion" aria-label="Detalles reales"></a>
+        <video class="seq__video" src="assets/video/dive-hd.mp4" muted playsinline preload="none" width="1280" height="720" aria-label="Piscina Smart Pools: descenso al agua"></video>
+        <picture><source media="(max-width: 760px), (orientation: portrait) and (max-width: 1100px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><img class="seq__poster" src="assets/video/poster-dive.webp" alt="Piscina Smart Pools" width="1920" height="1080" fetchpriority="high"></picture>
       </div>
       <div class="bubbles" aria-hidden="true">
         <span style="--x:45;--s:8;--d:0.39"></span>
@@ -143,6 +135,36 @@
         <span style="--x:78;--s:16;--d:0.64"></span>
         <span style="--x:51;--s:6;--d:0.55"></span>
         <span style="--x:12;--s:16;--d:0.06"></span>
+      </div>
+      <div class="dive dive--surface" data-phase="surface">
+        <div class="dive__center">
+          <p class="dive__eyebrow">Piscinas de fibra de vidrio reforzado</p>
+          <p class="dive__title">Tu piscina,<br>más cerca de casa</p>
+          <a class="btn btn--cream dive__btn" href="#modelos">Ver modelos <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="dive__cards">
+          <a class="gcard" href="#ventajas"><span class="gcard__thumb"><img src="assets/modelos/los-roques-1-card-sm.webp" alt="" loading="lazy" width="450" height="300"></span><span>Ventajas del Fiberglass</span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="gcard" href="#catalogo"><span class="gcard__thumb"><img src="assets/modelos/dubai-1-card-sm.webp" alt="" loading="lazy" width="450" height="300"></span><span>Diseños de piscina</span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="gcard" href="#inspiracion"><span class="gcard__thumb"><img src="assets/modelos/floripa-1-card-sm.webp" alt="" loading="lazy" width="450" height="300"></span><span>Instalaciones reales</span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="dive dive--deep" data-phase="deep">
+        <div class="dive__copy">
+          <p class="dive__eyebrow">Inmersión</p>
+          <p class="dive__title dive__title--left">Desciende dentro<br>de la experiencia</p>
+          <p class="dive__text">Deja que el agua te guíe a un estado más tranquilo. Nuestras piscinas de fibra de vidrio están diseñadas para realzar cada momento, con un interior suave, resistente y pensado para durar.</p>
+        </div>
+        <div class="dive__bottom">
+          <div class="dive__row">
+            <div><p class="dive__eyebrow">Bajo la superficie</p><p class="dive__sub">Detalles que hacen la diferencia</p></div>
+            <a class="dive__link" href="#ventajas">Ver todas las características <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+          <div class="dive__cards dive__cards--deep">
+            <a class="gcard gcard--deep" href="#catalogo"><small>Diseño funcional</small><span>Escalones integrados</span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="gcard gcard--deep" href="#fibra"><small>Estética superior</small><span>Interior celeste</span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="gcard gcard--deep" href="#inspiracion"><small>Calidad en cada detalle</small><span>Detalles reales</span><svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
       </div>
       <div class="hero__scrim" aria-hidden="true"></div>
       <div class="hero__exit"></div>
@@ -670,6 +692,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=20261112a" defer></script>
+  <script src="js/main.js?v=20261112b" defer></script>
 </body>
 </html>
