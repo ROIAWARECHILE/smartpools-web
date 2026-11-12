@@ -38,7 +38,7 @@
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261113a'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261113b'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
