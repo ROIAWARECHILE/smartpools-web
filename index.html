@@ -38,7 +38,7 @@
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261115e'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261115f'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -602,7 +602,7 @@
           </a>
         </div>
 
-        <!-- Envío: ver CONFIG.formEndpoint en js/main.js. Sin endpoint, abre WhatsApp con el mensaje armado -->
+        <!-- Envío: CONFIG.formEndpoint en js/main.js (FormSubmit a ventas@smartpools.cl); si falla, la solicitud se ofrece por WhatsApp -->
         <form class="form" novalidate>
           <input class="form__hp" type="text" name="empresa" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="form__steps" aria-hidden="true"><span class="is-on">1. Tu proyecto</span><span>2. Tus datos</span></div>
