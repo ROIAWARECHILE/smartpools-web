@@ -1660,24 +1660,12 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .ficha__scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: #eef3f7; }
 .ficha__img { display: block; width: 100%; height: auto; }
 @media (max-width: 760px) { .ficha { padding: 8px; } .ficha__box { max-height: calc(100svh - 16px); } .ficha__dl span { display: none; } .ficha__dl { padding: 8px; } }
-
-/* ---------- la ficha técnica como primera imagen del modelo ---------- */
-.modal__img--ficha { object-fit: cover; object-position: top center; background: #eef3f7; cursor: zoom-in; }
-.modal__media.is-ficha { background: #eef3f7; }
-.modal__zoom { position: absolute; left: 16px; top: 16px; z-index: 3; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border: 0; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; color: #fff; background: rgba(7, 42, 64, .72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-.modal__zoom[hidden] { display: none; }
-.modal__zoom:hover { background: rgba(7, 42, 64, .9); }
-.modal__zoom svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.modal__thumb-ficha { position: relative; }
-.modal__thumb-ficha img { object-position: top; }
-.modal__thumb-ficha span { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px; font-size: 8.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-align: center; color: #fff; background: rgba(7, 42, 64, .82); }
-@media (max-width: 760px) { .modal__zoom span { display: none; } .modal__zoom { padding: 9px; } }
 </style>
   <script>
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261128b'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261128c'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -2321,8 +2309,7 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
       <div class="modal__media">
         <img class="modal__img" alt="">
         <span class="modal__badge badge" hidden></span>
-        <button class="modal__zoom" type="button" aria-label="Ampliar ficha técnica" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Ampliar ficha</span></button>
-        <div class="modal__thumbs" aria-label="Fotos y ficha del modelo"></div>
+        <div class="modal__thumbs" aria-label="Fotos del modelo"></div>
       </div>
       <div class="modal__body">
         <p class="modal__eyebrow"></p>
@@ -2354,6 +2341,6 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </div>
 
-  <script src="js/asistente.js?v=20261128b" defer></script>
+  <script src="js/asistente.js?v=20261128c" defer></script>
 </body>
 </html>
