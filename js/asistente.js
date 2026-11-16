@@ -28,7 +28,8 @@
     launcher = el('button', 'spa-launch');
     launcher.type = 'button';
     launcher.setAttribute('aria-label', 'Abrir el asistente');
-    launcher.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z"/><circle cx="9" cy="11" r="1.1"/><circle cx="13" cy="11" r="1.1"/><circle cx="17" cy="11" r="1.1"/></svg><span>Asistente</span>';
+    var SPARK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l1.9 5.6c.26.75.85 1.34 1.6 1.6L21 11.3l-5.5 1.9c-.75.26-1.34.85-1.6 1.6L12 20.4l-1.9-5.6a2.4 2.4 0 0 0-1.6-1.6L3 11.3l5.5-1.9a2.4 2.4 0 0 0 1.6-1.6z"/><path d="M19 3.2l.62 1.86c.09.26.29.46.55.55L22 6.2l-1.83.63c-.26.09-.46.29-.55.55L19 9.2l-.62-1.82a.9.9 0 0 0-.55-.55L16 6.2l1.83-.59c.26-.09.46-.29.55-.55z"/></svg>';
+    launcher.innerHTML = SPARK + '<span>Asistente IA</span>';
     launcher.addEventListener('click', toggle);
 
     panel = el('section', 'spa-panel');
@@ -37,8 +38,8 @@
     panel.setAttribute('aria-modal', 'false');
     panel.hidden = true;
     panel.innerHTML =
-      '<header class="spa-head"><span class="spa-dot" aria-hidden="true"></span>' +
-      '<div><b>Asistente Smart Pools</b><small>Responde al instante · cotiza tu piscina</small></div>' +
+      '<header class="spa-head"><span class="spa-ava" aria-hidden="true">' + SPARK + '</span>' +
+      '<div><b>Asistente Smart Pools</b><small>En línea · responde al instante</small></div>' +
       '<button type="button" class="spa-x" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>' +
       '<div class="spa-log" aria-live="polite"></div>' +
       '<form class="spa-form"><input type="text" class="spa-input" autocomplete="off" placeholder="Escribe tu mensaje…" aria-label="Mensaje" maxlength="500">' +
