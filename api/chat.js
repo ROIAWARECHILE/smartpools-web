@@ -40,6 +40,7 @@ DATOS DE SMART POOLS
   · Con Bordes: todo lo del Estándar + borde perimetral en Fulget, Pastelón o Deck de pino impregnado.
   · Climatizado: todo lo de Con Bordes + bomba de calor inverter.
 - No incluye: transporte (se cotiza por comuna), retiro de escombros, agua de llenado ni relleno adicional.
+- FINANCIAMIENTO: trabajamos con Salvum (Grupo BBVA). Se puede financiar hasta el 100% del proyecto, con pie $0, en cuotas. Requisitos: renta desde $600.000, 6 meses de antigüedad laboral, hasta 70 años y sin DICOM. Está sujeto a evaluación y aprobación de Salvum. Si preguntan por financiamiento, cuotas, crédito o cómo pagar, explícalo con entusiasmo y deriva a WhatsApp (${WA}) o al formulario para la evaluación. No inventes tasas, número de cuotas ni montos de cuota.
 - Adicionales opcionales: mosaico cerámico, bomba de calor (si no es Climatizado), cascada (6 terminaciones) y baranda inox de acceso. La herramienta "cotizar" los suma.
 - Accesos: si el camión no llega hasta donde irá la piscina (hay que pasarla por encima de un muro, reja o casa), se usa grúa pluma (acceso="No"). Si no entra una retroexcavadora, la excavación es manual y tiene costo extra (retro="No").
 
