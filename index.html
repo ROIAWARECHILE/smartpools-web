@@ -1660,12 +1660,25 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .ficha__scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: #eef3f7; }
 .ficha__img { display: block; width: 100%; height: auto; }
 @media (max-width: 760px) { .ficha { padding: 8px; } .ficha__box { max-height: calc(100svh - 16px); } .ficha__dl span { display: none; } .ficha__dl { padding: 8px; } }
+
+/* ---------- financiamiento destacado (modal + resumen) ---------- */
+.modal__fin { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 15px; border-radius: 14px; background: linear-gradient(100deg, #eaf6fb, #e6f0fb); border: 1px solid #cfe6f1; color: var(--navy); font-size: 13.5px; line-height: 1.35; transition: background-color .2s var(--ease), border-color .2s var(--ease); }
+.modal__fin:hover { border-color: #9cc7da; background: #e0f0f8; }
+.modal__fin > svg:first-child { flex: none; width: 32px; height: 32px; padding: 7px; border-radius: 9px; background: var(--blue); color: #fff; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.modal__fin span { flex: 1; }
+.modal__fin b { color: var(--pool-light); }
+.modal__fin .i-arrow { flex: none; width: 17px; height: 17px; fill: none; stroke: var(--blue); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s var(--ease); }
+.modal__fin:hover .i-arrow { transform: translateX(3px); }
+.sum__fin { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #d6e2ea; font-size: 13px; color: #33465c; line-height: 1.45; }
+.sum__fin svg { flex: none; width: 19px; height: 19px; margin-top: 1px; fill: none; stroke: var(--blue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sum__fin b { color: var(--navy); }
+.sum__fin a { color: var(--blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 </style>
   <script>
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261128c'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261128d'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -2245,6 +2258,7 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
               <p class="form__done-sumhead"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Tu cotización referencial</p>
               <ul class="sum__lines form__done-lines"></ul>
               <p class="form__done-note">Valores referenciales con IVA. Para cambiar algo o confirmar tu proyecto, escríbenos por WhatsApp.</p>
+              <p class="sum__fin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Este monto lo puedes <b>financiar hasta el 100%</b>, con pie $0 (Salvum, Grupo BBVA). <a href="#financiamiento">Ver financiamiento</a></span></p>
             </div>
             <div class="form__done-ctas">
               <a class="btn btn--wa form__done-wa" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1a12.9 12.9 0 0 0 6.1 1.5c7 0 12.7-5.6 12.7-12.6S23 3 16 3z"/></svg>Hablar por WhatsApp</a>
@@ -2322,6 +2336,11 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
           <div class="modal__tier is-top"><i>El más vendido</i><span>Proyecto Con Bordes</span><small>+ borde perimetral en Fulget, Pastelón o Deck de pino impregnado</small><b></b></div>
           <div class="modal__tier"><span>Proyecto Climatizado</span><small>+ bomba de calor inverter eficiente</small><b></b></div>
         </div>
+        <a class="modal__fin" href="#financiamiento">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span><b>Financia hasta el 100%</b> · pie $0, en cuotas con Salvum (Grupo BBVA)</span>
+          <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
         <p class="modal__note">Valores "desde", con IVA, a confirmar con inspección digital. Transporte según ubicación. No incluye retiro de escombros, agua ni relleno adicional.</p>
         <div class="modal__actions">
           <a class="btn btn--cta modal__quote" href="#contacto">Cotizar este modelo
@@ -2341,6 +2360,6 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </div>
 
-  <script src="js/asistente.js?v=20261128c" defer></script>
+  <script src="js/asistente.js?v=20261128d" defer></script>
 </body>
 </html>

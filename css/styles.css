@@ -1615,3 +1615,16 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .ficha__scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: #eef3f7; }
 .ficha__img { display: block; width: 100%; height: auto; }
 @media (max-width: 760px) { .ficha { padding: 8px; } .ficha__box { max-height: calc(100svh - 16px); } .ficha__dl span { display: none; } .ficha__dl { padding: 8px; } }
+
+/* ---------- financiamiento destacado (modal + resumen) ---------- */
+.modal__fin { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 15px; border-radius: 14px; background: linear-gradient(100deg, #eaf6fb, #e6f0fb); border: 1px solid #cfe6f1; color: var(--navy); font-size: 13.5px; line-height: 1.35; transition: background-color .2s var(--ease), border-color .2s var(--ease); }
+.modal__fin:hover { border-color: #9cc7da; background: #e0f0f8; }
+.modal__fin > svg:first-child { flex: none; width: 32px; height: 32px; padding: 7px; border-radius: 9px; background: var(--blue); color: #fff; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.modal__fin span { flex: 1; }
+.modal__fin b { color: var(--pool-light); }
+.modal__fin .i-arrow { flex: none; width: 17px; height: 17px; fill: none; stroke: var(--blue); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s var(--ease); }
+.modal__fin:hover .i-arrow { transform: translateX(3px); }
+.sum__fin { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #d6e2ea; font-size: 13px; color: #33465c; line-height: 1.45; }
+.sum__fin svg { flex: none; width: 19px; height: 19px; margin-top: 1px; fill: none; stroke: var(--blue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sum__fin b { color: var(--navy); }
+.sum__fin a { color: var(--blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
