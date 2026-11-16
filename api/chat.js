@@ -4,7 +4,7 @@
 'use strict';
 const P = require('./_pricing.js');
 
-const MODEL = process.env.CHAT_MODEL || 'claude-opus-5-5';
+const MODEL = process.env.CHAT_MODEL || 'claude-haiku-5-5';
 const WA = '+56 9 7614 6262';
 
 // --- límites simples contra abuso (por instancia; para un tope estricto usar un KV/Supabase) ---
