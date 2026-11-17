@@ -898,7 +898,7 @@ h1, h2, h3, p { margin: 0; }
 }
 
 /* ---------- formulario: extras ---------- */
-.form__hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.form__hp { display: none !important; }
 .check { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, .78); cursor: pointer; }
 .check input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--aqua-strong); }
 .check a { text-decoration: underline; text-underline-offset: 3px; }
