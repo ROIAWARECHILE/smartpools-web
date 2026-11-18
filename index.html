@@ -1706,12 +1706,38 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .gcard__title, .dcard__title, .gcard--deep span, .dive__sub { font-weight: 700; letter-spacing: -.015em; }
 .process__pool-label { font-style: normal; font-weight: 700; font-size: 26px; }
 .marquee__track span { font-style: normal; font-weight: 700; letter-spacing: -.02em; }
+
+/* ---------- p51: planos de forma y medidas ---------- */
+.mcard__plan { float: right; width: 104px; height: auto; margin: 10px 0 8px 12px; border-radius: 6px; }
+.mcard__specs { clear: both; }
+.cat__planhint { display: flex; align-items: center; gap: 12px; margin-top: 16px; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.cat__planhint svg { flex: none; width: 44px; height: 26px; fill: #36c5e8; stroke: #0a6a94; stroke-width: 2; }
+.cat__planhint path { fill: none; stroke: #fff; stroke-width: 2; }
+.cat__planhint b { color: var(--navy-2); font-weight: 700; }
+.modal__card { grid-template-rows: auto minmax(0, 1fr); }
+.modal__media { grid-column: 1; grid-row: 1; }
+.modal__body { grid-column: 2; grid-row: 1 / span 2; }
+.modal__shape { grid-column: 1; grid-row: 2; padding: 20px 24px 22px; overflow-y: auto; min-height: 0; }
+.modal__shape[hidden] { display: none; }
+.modal__shape h4 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
+.modal__shape p { margin-top: 3px; font-size: 13px; color: #4a5873; }
+.modal__shape-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; align-items: center; margin-top: 12px; }
+.modal__shape-grid img { display: block; width: 100%; height: auto; }
+.modal__shape-perfil { border-radius: 12px; }
+.modal__body .modal__shape { padding: 0; margin-top: 20px; overflow: visible; }
+@media (max-width: 860px) {
+  .modal__card { grid-template-rows: auto 1fr; }
+  .modal__media, .modal__body { grid-column: auto; grid-row: auto; }
+  .modal__shape-grid { grid-template-columns: 1fr; gap: 10px; }
+  .modal__shape-plan { max-width: 340px; margin-inline: auto; }
+  .mcard__plan { width: 112px; }
+}
 </style>
   <script>
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261129b'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261130a'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -1907,6 +1933,7 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
             </div>
           <p class="cat__count" aria-live="polite"></p>
         </div>
+        <p class="wrap cat__planhint"><svg viewBox="0 0 44 26" aria-hidden="true"><rect x="1.5" y="1.5" width="41" height="23" rx="5"/><path d="M33 5v16M37 5v16"/></svg><span><b>La vista en planta te ayuda a comparar las formas.</b> Mira el tamaño, la proporción y dónde va la escalera de cada modelo.</span></p>
         <div class="cat__grid" id="catalogo"></div>
         <p class="cat__empty" hidden>Estamos preparando nuevos modelos en esta categoría. <a href="#contacto">Escríbenos</a> y te asesoramos.</p>
       </div>
@@ -2358,6 +2385,14 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
         <span class="modal__badge badge" hidden></span>
         <div class="modal__thumbs" aria-label="Fotos del modelo"></div>
       </div>
+      <section class="modal__shape" hidden>
+        <h4>Forma y medidas</h4>
+        <p>Vista superior y dimensiones referenciales del modelo.</p>
+        <div class="modal__shape-grid">
+          <img class="modal__shape-plan" alt="" loading="lazy">
+          <img class="modal__shape-perfil" alt="" loading="lazy">
+        </div>
+      </section>
       <div class="modal__body">
         <p class="modal__eyebrow"></p>
         <h3 class="modal__title" id="modal-title"></h3>
@@ -2393,6 +2428,6 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </div>
 
-  <script src="js/asistente.js?v=20261129b" defer></script>
+  <script src="js/asistente.js?v=20261130a" defer></script>
 </body>
 </html>
