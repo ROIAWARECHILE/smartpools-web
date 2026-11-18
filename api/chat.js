@@ -19,7 +19,7 @@ function rateLimited(ip) {
 
 function systemPrompt() {
   const modelos = P.modelosResumen().map(m =>
-    `- ${m.nombre} (${m.tamano}): ${m.ancho_m}×${m.largo_m} m, prof. ${m.prof_min_m}–${m.prof_max_m} m. ` +
+    `- ${m.nombre} (${m.tamano}): ${m.largo_m}×${m.ancho_m} m (largo × ancho), prof. ${m.prof_min_m}–${m.prof_max_m} m. ` +
     `Estándar ${P.clp(m.precio_estandar)}, Con Bordes ${P.clp(m.precio_con_bordes)}, Climatizado ${P.clp(m.precio_climatizado)}.`
   ).join('\n');
   return `Eres el asistente virtual de Smart Pools, una empresa chilena de piscinas de fibra de vidrio reforzado. Hablas en español de Chile, cercano, claro y breve. Tu trabajo es responder dudas y ayudar a armar una cotización referencial. No generas PDF ni documentos.
