@@ -34,8 +34,6 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Cuánto demora instalar una piscina de fibra de vidrio?","acceptedAnswer":{"@type":"Answer","text":"Tu piscina queda lista en 48 horas desde que llega al patio. Viene fabricada en una sola pieza: se excava con retroexcavadora, se prepara la cama de nivelación, se instala, se conecta y se pone en marcha."}},{"@type":"Question","name":"¿Necesito permiso municipal?","acceptedAnswer":{"@type":"Answer","text":"En la mayoría de las comunas una piscina residencial requiere un permiso de obra menor. Te entregamos los planos y la documentación técnica para presentarla y te orientamos en el trámite."}},{"@type":"Question","name":"¿Resiste los sismos?","acceptedAnswer":{"@type":"Answer","text":"Sí. La fibra de vidrio es un material flexible que acompaña los movimientos del terreno en vez de agrietarse, a diferencia del hormigón. Es una de las razones por las que funciona tan bien en Chile."}},{"@type":"Question","name":"¿Qué incluye la instalación?","acceptedAnswer":{"@type":"Answer","text":"El Proyecto Estándar incluye el casco con 1 foco, 1 skimmer, 2 retornos y 1 drenaje, bomba de 0,75 HP según modelo, equipo de filtrado con cuarzo filtrante, tablero eléctrico, excavación con retroexcavadora, cama de nivelación, fittinería completa, instalación, conexionado y puesta en marcha. El Proyecto Con Bordes suma el borde perimetral en Fulget, Pastelón o Deck de pino impregnado, y el Climatizado agrega una bomba de calor inverter."}},{"@type":"Question","name":"¿Cuánta mantención necesita?","acceptedAnswer":{"@type":"Answer","text":"Menos que una piscina tradicional. La superficie no porosa evita que se adhieran algas, así que usarás menos químicos y menos cepillado. Basta con mantener la filtración y revisar el agua cada semana."}},{"@type":"Question","name":"¿Cabe en mi patio?","acceptedAnswer":{"@type":"Answer","text":"Tenemos modelos desde 2,5 × 2,5 m (Ibiza) hasta 12 × 4 m (Praia), en tamaños S, M, L y XL. En la inspección medimos el espacio y los accesos, y te recomendamos el modelo que mejor aprovecha tu terreno."}},{"@type":"Question","name":"¿Qué no incluye el precio?","acceptedAnswer":{"@type":"Answer","text":"Los valores son \"desde\", incluyen IVA de los productos suministrados y se confirman con una inspección digital de tu terreno. El transporte se cotiza según la ubicación exacta, y no se incluye el retiro de escombros, el agua ni el relleno adicional."}}]}</script>
 
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-latin-wght-normal.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-latin-wght-italic.woff2" crossorigin>
   <style>
     @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 300 700; font-display: swap; src: url(assets/fonts/cormorant-garamond-latin-wght-normal.woff2) format('woff2-variations'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
     @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 300 700; font-display: swap; src: url(assets/fonts/cormorant-garamond-latin-wght-italic.woff2) format('woff2-variations'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
@@ -1673,12 +1671,47 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .sum__fin svg { flex: none; width: 19px; height: 19px; margin-top: 1px; fill: none; stroke: var(--blue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .sum__fin b { color: var(--navy); }
 .sum__fin a { color: var(--blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---------- p50: pulido visual ---------- */
+/* 1. medidas y nombre de la tarjeta en una sola línea */
+.mcard__specs { gap: 4px; }
+.mcard__specs .spec2 { gap: 6px; min-width: 0; }
+.mcard__specs .spec2__i { width: 20px; height: 20px; border: 0; background: none; }
+.mcard__specs .spec2 b, .mcard__specs .spec2 small { white-space: nowrap; }
+.mcard__specs .spec2 small { font-size: 11px; }
+.mcard__top { flex-wrap: wrap; row-gap: 6px; }
+.mcard__top { position: relative; padding-right: 44px; min-height: 34px; }
+.mcard__top .mcard__go { position: absolute; right: 0; top: 0; margin: 0; }
+.mcard__top h3 { white-space: nowrap; }
+/* 2. filtro fijo: tapa la franja por donde asomaban las tarjetas */
+.cat .cat__filter { background: rgba(246, 249, 252, .97); }
+.cat .cat__filter::before { content: ''; position: absolute; left: -6px; right: -6px; bottom: 100%; height: 16px; background: #f5f9fb; pointer-events: none; }
+/* 3. flotantes: las tarjetas del hero no pasan por debajo, y el medidor solo donde hay margen libre */
+@media (min-width: 901px) { .dive__cards { padding-right: clamp(0px, calc(200px - (100vw - 1240px) / 2), 152px); } }
+@media (max-width: 1480px) { .depth { display: none; } }
+/* 4. una sola tipografía (la misma del inicio y Modelos) */
+:root { --serif: var(--sans); }
+.h2, .under__title, .under__h3 { font-weight: 800; letter-spacing: -.025em; line-height: 1.06; }
+.h2 { font-size: clamp(2.1rem, 3.6vw, 3.3rem); }
+.under__title { font-size: clamp(2.1rem, 3.6vw, 3.3rem); }
+.h2 em, .under__title em, .under__h3 em, .adv__cta-text em, .band__title em { font-style: normal; }
+.step h3 { font-weight: 700; font-size: 1.4rem; letter-spacing: -.01em; }
+.adv__card h3 { font-weight: 700; font-size: 1.45rem; letter-spacing: -.01em; line-height: 1.15; }
+.adv__cta-text { font-weight: 700; font-size: 1.7rem; letter-spacing: -.015em; }
+.adv__idx, .layers__counter { font-style: normal; font-weight: 600; font-size: .95rem; }
+.band__title { font-weight: 700; letter-spacing: -.02em; }
+.contact__data a { font-weight: 600; font-size: 1.12rem; }
+.form__done b { font-weight: 800; font-size: 1.7rem; letter-spacing: -.02em; }
+.pillar__num { font-weight: 800; font-size: 3rem; letter-spacing: -.03em; }
+.gcard__title, .dcard__title, .gcard--deep span, .dive__sub { font-weight: 700; letter-spacing: -.015em; }
+.process__pool-label { font-style: normal; font-weight: 700; font-size: 26px; }
+.marquee__track span { font-style: normal; font-weight: 700; letter-spacing: -.02em; }
 </style>
   <script>
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261128h'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261129b'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -2360,6 +2393,6 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </div>
 
-  <script src="js/asistente.js?v=20261128h" defer></script>
+  <script src="js/asistente.js?v=20261129b" defer></script>
 </body>
 </html>
