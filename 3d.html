@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Piscina en 3D | Smart Pools</title>
+<style>
+  :root { --ink: #0b1d2a; --blue: #0a6a94; --muted: #4a5873; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #eaf4f9; font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
+  #stage { position: fixed; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 38%, #ffffff 0%, #eaf4f9 55%, #d5e8f1 100%); touch-action: none; cursor: grab; }
+  #stage.is-drag { cursor: grabbing; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .hud { position: fixed; left: 0; right: 0; pointer-events: none; display: flex; justify-content: center; padding: 0 16px; }
+  .hud--top { top: max(18px, env(safe-area-inset-top)); flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+  .hud--top small { font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--blue); font-weight: 600; }
+  .hud--top h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 800; letter-spacing: -.02em; }
+  .hud--bottom { bottom: max(18px, env(safe-area-inset-bottom)); flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 8px 14px; border-radius: 999px; background: rgba(255, 255, 255, .86); box-shadow: 0 8px 22px -14px rgba(10, 50, 80, .6); font-size: 13px; color: var(--muted); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .chip b { color: var(--ink); }
+  .hint { transition: opacity .6s; }
+  .hint.is-off { opacity: 0; }
+  #fail { position: fixed; inset: 0; display: none; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="hud hud--top"><small>Vista 3D referencial</small><h1 id="nombre">Piscina</h1></div>
+<div class="hud hud--bottom">
+  <span class="chip" id="medidas"></span>
+  <span class="chip hint" id="hint">Arrastra para girar (más rápido, más olas) · toca el agua</span>
+</div>
+<div id="fail">Tu navegador no pudo mostrar la vista 3D.</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// ---- medidas de cada modelo (planos de forma y medidas); el casco viene de Blender ----
+const MODELOS = {
+  'praia':      { nombre: 'Praia',      L: 12,  W: 4.0, din: 0.9, dd: 2.0 },
+  'los-roques': { nombre: 'Los Roques', L: 10,  W: 3.4, din: 1.2, dd: 1.8 },
+  'catalonia':  { nombre: 'Catalonia',  L: 8,   W: 3.4, din: 1.2, dd: 1.7 },
+  'tulum':      { nombre: 'Tulum',      L: 6,   W: 3.0, din: 1.2, dd: 1.7 },
+  'buzios':     { nombre: 'Buzios',     L: 5.5, W: 3.0, din: 1.2, dd: 1.6 },
+  'rio':        { nombre: 'Rio',        L: 7,   W: 3.4, din: 1.2, dd: 1.75 }
+};
+const SLUG = (new URLSearchParams(location.search).get('m') || 'praia').toLowerCase();
+const CFG = MODELOS[SLUG] || MODELOS.praia, SLUG_OK = MODELOS[SLUG] ? SLUG : 'praia';
+const L = CFG.L, W = CFG.W, R = 0.38;
+const D_IN = CFG.din, D_DEEP = CFG.dd;
+const es = v => (Math.round(v * 100) / 100).toString().replace('.', ',');
+document.getElementById('nombre').textContent = CFG.nombre;
+document.getElementById('medidas').innerHTML = '<b>' + es(L) + ' × ' + es(W) + ' m</b> · profundidad <b>' + es(D_IN) + ' a ' + es(D_DEEP) + ' m</b>';
+document.title = CFG.nombre + ' en 3D | Smart Pools';
+const XMIN = -L / 2, XMAX = L / 2;
+const WATER_Y = -0.14;
+const SUN = new THREE.Vector3(0.45, 0.8, 0.35).normalize();
+
+const stage = document.getElementById('stage');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+catch (e) { document.getElementById('fail').style.display = 'grid'; throw e; }
+const PR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.setPixelRatio(PR);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 1, 90);
+scene.add(new THREE.HemisphereLight(0xffffff, 0xbfd9e6, 0.35));
+const sun = new THREE.DirectionalLight(0xfff4e0, 1.7);
+sun.position.copy(SUN).multiplyScalar(20);
+scene.add(sun);
+
+const pool = new THREE.Group();
+scene.add(pool);
+
+// ---- perfil del casco ----
+function hwTop(x) {
+  const dx = Math.min(x - XMIN, XMAX - x);
+  if (dx >= R) return W / 2;
+  const k = R - Math.max(dx, 0);
+  return W / 2 - R + Math.sqrt(Math.max(R * R - k * k, 0));
+}
+const lerp = (a, b, t) => a + (b - a) * Math.min(Math.max(t, 0), 1);
+// ---- agua simulada (aguas someras) ----
+const NX = 120, NZ = 40, DX = L / NX, DZ = W / NZ;
+const G = 6.5, H0 = 2.0;
+const hgt = new Float32Array(NX * NZ), hPrev = new Float32Array(NX * NZ), uu = new Float32Array((NX + 1) * NZ), ww = new Float32Array(NX * (NZ + 1));
+const foam = new Float32Array(NX * NZ);
+const heightTex = new THREE.DataTexture(new Float32Array(NX * NZ), NZ, NX, THREE.RedFormat, THREE.FloatType);
+heightTex.minFilter = heightTex.magFilter = THREE.LinearFilter; heightTex.needsUpdate = true;
+
+// casco: gelcoat + luz suave en el fondo calculada desde las olas (solo piso, nunca paredes)
+const shellMat = new THREE.MeshStandardMaterial({ color: 0x8fdcee, roughness: 0.34, metalness: 0.02, envMapIntensity: 0.55 });
+const shellU = { uHeight: { value: heightTex }, uTime: { value: 0 } };
+shellMat.onBeforeCompile = sh => {
+  Object.assign(sh.uniforms, shellU);
+  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vLocal; varying vec3 vON;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvLocal = position; vON = normal;');
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+    varying vec3 vLocal; varying vec3 vON; uniform sampler2D uHeight; uniform float uTime;
+    float hAt(vec2 xz) { return texture2D(uHeight, vec2(xz.y / ${W.toFixed(1)} + 0.5, xz.x / ${L.toFixed(1)} + 0.5)).r; }
+    float rip(vec2 p, float t) { return sin(p.x * 2.1 + t * 1.1 + sin(p.y * 1.7 + t * 0.7) * 1.3) + sin(p.y * 2.6 - t * 0.9 + sin(p.x * 1.9 - t * 0.6) * 1.2) + sin((p.x + p.y) * 1.5 + t * 0.8); }`)
+    .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+    {
+      float floorMask = smoothstep(0.55, 0.95, normalize(vON).y) * smoothstep(${WATER_Y.toFixed(2)}, ${(WATER_Y - 0.12).toFixed(2)}, vLocal.y);
+      vec2 p = vLocal.xz + vec2(0.25, 0.12) * (-vLocal.y);
+      float e = 0.16;
+      float lap = (hAt(p + vec2(e, 0.)) + hAt(p - vec2(e, 0.)) + hAt(p + vec2(0., e)) + hAt(p - vec2(0., e)) - 4. * hAt(p)) / (e * e);
+      float r = rip(p * 1.6, uTime);
+      float c = clamp(-lap * 0.55, -0.5, 1.6) + smoothstep(1.2, 2.6, r) * 0.55;
+      totalEmissiveRadiance += vec3(0.55, 0.85, 1.0) * c * 0.2 * floorMask;
+    }`);
+};
+new GLTFLoader().load('assets/3d/' + SLUG_OK + '.glb', g => {
+  g.scene.traverse(o => { if (o.isMesh) { o.material = shellMat; o.frustumCulled = false; } });
+  pool.add(g.scene); window.__pool3d && (window.__pool3d.hull = true);
+}, undefined, () => { document.getElementById('fail').style.display = 'grid'; });
+
+// ---- borde del casco y deck de piedra alrededor ----
+function roundedRect(shape, l, w, r) {
+  const x = -l / 2, y = -w / 2;
+  shape.moveTo(x + r, y); shape.lineTo(x + l - r, y); shape.absarc(x + l - r, y + r, r, -Math.PI / 2, 0, false);
+  shape.lineTo(x + l, y + w - r); shape.absarc(x + l - r, y + w - r, r, 0, Math.PI / 2, false);
+  shape.lineTo(x + r, y + w); shape.absarc(x + r, y + w - r, r, Math.PI / 2, Math.PI, false);
+  shape.lineTo(x, y + r); shape.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false);
+  return shape;
+}
+const rimShape = roundedRect(new THREE.Shape(), L + 0.46, W + 0.46, R + 0.23);
+rimShape.holes.push(roundedRect(new THREE.Path(), L, W, R));
+const rimGeo = new THREE.ExtrudeGeometry(rimShape, { depth: 0.075, bevelEnabled: true, bevelThickness: 0.018, bevelSize: 0.018, bevelSegments: 3, curveSegments: 12 });
+rimGeo.rotateX(-Math.PI / 2);
+const rim = new THREE.Mesh(rimGeo, new THREE.MeshStandardMaterial({ color: 0xf4f9fb, roughness: 0.35, envMapIntensity: 0.7 }));
+rim.position.y = -0.005;
+pool.add(rim);
+
+const deckTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+  g.fillStyle = '#d9d2c6'; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 9000; i++) { const v = 190 + Math.random() * 50 | 0; g.fillStyle = `rgba(${v},${v - 6},${v - 16},.22)`; g.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 2, 1 + Math.random() * 2); }
+  g.strokeStyle = 'rgba(110,100,88,.55)'; g.lineWidth = 3;
+  for (let r = 0; r <= 4; r++) { g.beginPath(); g.moveTo(0, r * 128); g.lineTo(512, r * 128); g.stroke(); for (let q = -1; q < 3; q++) { const x = q * 256 + (r % 2) * 128; g.beginPath(); g.moveTo(x, r * 128); g.lineTo(x, r * 128 + 128); g.stroke(); } }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+})();
+const deckShape = roundedRect(new THREE.Shape(), L + 3.4, W + 3.4, 0.5);
+deckShape.holes.push(roundedRect(new THREE.Path(), L + 0.44, W + 0.44, R + 0.22));
+const deckGeo = new THREE.ExtrudeGeometry(deckShape, { depth: 0.16, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2, curveSegments: 10 });
+deckGeo.rotateX(-Math.PI / 2);
+{ const p = deckGeo.attributes.position, u = deckGeo.attributes.uv; for (let i = 0; i < p.count; i++) u.setXY(i, p.getX(i) * 0.42, p.getZ(i) * 0.42); }
+const deck = new THREE.Mesh(deckGeo, new THREE.MeshStandardMaterial({ map: deckTex, roughness: 0.85, envMapIntensity: 0.45 }));
+deck.position.y = -0.165;
+pool.add(deck);
+
+// ---- malla del agua ----
+const wPos = new Float32Array(NX * NZ * 3), wNor = new Float32Array(NX * NZ * 3), wIdx = [];
+const gx = new Float32Array(NX), gz = new Float32Array(NX * NZ);
+for (let i = 0; i < NX; i++) {
+  const x = lerp(XMIN + 0.02, XMAX - 0.02, i / (NX - 1)), hw = hwTop(x) - 0.02; gx[i] = x;
+  for (let j = 0; j < NZ; j++) gz[i * NZ + j] = lerp(-hw, hw, j / (NZ - 1));
+}
+for (let i = 0; i < NX - 1; i++) for (let j = 0; j < NZ - 1; j++) { const a = i * NZ + j, b = a + 1, c = a + NZ, d2 = c + 1; wIdx.push(a, b, c, b, d2, c); }
+const waterGeo = new THREE.BufferGeometry();
+waterGeo.setAttribute('position', new THREE.BufferAttribute(wPos, 3));
+waterGeo.setAttribute('normal', new THREE.BufferAttribute(wNor, 3));
+waterGeo.setAttribute('aFoam', new THREE.BufferAttribute(foam, 1));
+waterGeo.setIndex(wIdx);
+
+// lo que hay bajo el agua se dibuja primero a una textura: el agua la muestra deformada (refracción) y teñida según la profundidad
+const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, depthTexture: new THREE.DepthTexture(4, 4) });
+const waterMat = new THREE.ShaderMaterial({
+  uniforms: {
+    tScene: { value: rt.texture }, tDepth: { value: rt.depthTexture }, tSky: { value: null }, uHasSky: { value: 0 },
+    uRes: { value: new THREE.Vector2(1, 1) }, uNear: { value: camera.near }, uFar: { value: camera.far },
+    uTime: { value: 0 }, uSun: { value: SUN.clone() }, uYaw: { value: 0 }
+  },
+  vertexShader: `
+    attribute float aFoam; varying vec3 vWorld; varying vec3 vLocal; varying vec3 vN; varying float vFoam; varying float vViewZ;
+    void main() { vLocal = position; vFoam = aFoam; vN = normalize(mat3(modelMatrix) * normal);
+      vec4 w = modelMatrix * vec4(position, 1.0); vWorld = w.xyz; vec4 mv = viewMatrix * w; vViewZ = -mv.z; gl_Position = projectionMatrix * mv; }`,
+  fragmentShader: `
+    #include <common>
+    #include <packing>
+    uniform sampler2D tScene, tDepth, tSky; uniform float uHasSky, uNear, uFar, uTime, uYaw; uniform vec2 uRes; uniform vec3 uSun;
+    varying vec3 vWorld; varying vec3 vLocal; varying vec3 vN; varying float vFoam; varying float vViewZ;
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float noise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+      return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
+    float fbm(vec2 p) { float a = .5, s = 0.; for (int i = 0; i < 4; i++) { s += a * noise(p); p = p * 2.03 + 7.1; a *= .5; } return s; }
+    vec2 ripple(vec2 p, float t) {
+      vec2 g = vec2(0.);
+      g += vec2(1.0, 0.35) * cos(dot(p, vec2(1.0, 0.35)) * 3.1 + t * 1.3) * 0.5;
+      g += vec2(-0.4, 1.0) * cos(dot(p, vec2(-0.4, 1.0)) * 4.3 - t * 1.6) * 0.35;
+      g += vec2(0.8, -0.7) * cos(dot(p, vec2(0.8, -0.7)) * 6.7 + t * 2.1) * 0.22;
+      g += vec2(0.2, 1.0) * cos(dot(p, vec2(0.2, 1.0)) * 9.9 - t * 2.7) * 0.14;
+      return g + (vec2(noise(p * 7. + t * .6), noise(p * 7. - t * .5 + 9.)) - .5) * 0.5;
+    }
+    vec3 sky(vec3 d) {
+      if (uHasSky > 0.5) { vec2 uv = vec2(atan(d.z, d.x) / (2. * PI) + 0.5, acos(clamp(d.y, -1., 1.)) / PI); return min(texture2D(tSky, uv).rgb, vec3(6.)); }
+      float t = clamp(d.y, 0., 1.); return mix(vec3(0.82, 0.9, 1.0), vec3(0.2, 0.5, 0.95), pow(t, 0.55));
+    }
+    float linDepth(vec2 uv) { return -perspectiveDepthToViewZ(texture2D(tDepth, uv).x, uNear, uFar); }
+    void main() {
+      vec2 uv = gl_FragCoord.xy / uRes;
+      vec3 V = normalize(cameraPosition - vWorld);
+      float c = cos(uYaw), s = sin(uYaw);
+      vec2 rp = ripple(vLocal.xz, uTime) * 0.045;
+      vec3 N = normalize(vN + vec3(rp.x * c + rp.y * s, 0., -rp.x * s + rp.y * c));
+      if (!gl_FrontFacing) N = -N;
+      float thick0 = max(linDepth(uv) - vViewZ, 0.);
+      vec2 off = (viewMatrix * vec4(N, 0.)).xy * 0.055 * clamp(thick0, 0., 1.6) / max(vViewZ * 0.12, 0.4);
+      vec2 uv2 = uv + off;
+      float d2 = linDepth(uv2);
+      if (d2 < vViewZ) { uv2 = uv; d2 = linDepth(uv); }
+      float thick = max(d2 - vViewZ, 0.);
+      vec3 under = texture2D(tScene, uv2).rgb;
+      vec3 absorb = exp(-thick * vec3(0.62, 0.11, 0.055));
+      vec3 scatter = vec3(0.02, 0.33, 0.52) * (1. - exp(-thick * 0.5));
+      vec3 refr = under * absorb + scatter;
+      float F = 0.02 + 0.98 * pow(1. - clamp(dot(N, V), 0., 1.), 5.);
+      vec3 Rd = reflect(-V, N); Rd.y = abs(Rd.y);
+      vec3 refl = sky(Rd);
+      float sd = max(dot(reflect(-V, N), uSun), 0.);
+      float spec = pow(sd, 420.) * 14. + pow(sd, 60.) * 0.35;
+      vec3 col = mix(refr, refl, F) + vec3(1.0, 0.96, 0.88) * spec;
+      float f = clamp(vFoam, 0., 1.);
+      float fn = fbm(vLocal.xz * 9. + vec2(uTime * 0.15, -uTime * 0.11)) * 0.75 + fbm(vLocal.xz * 26.) * 0.25;
+      float fm = smoothstep(1.0 - f * 0.85, 1.3 - f * 0.85, fn + f * 0.2);
+      col = mix(col, vec3(0.93, 0.97, 1.0), fm * 0.72);
+      gl_FragColor = vec4(col, 1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }`,
+  side: THREE.DoubleSide
+});
+const water = new THREE.Mesh(waterGeo, waterMat);
+water.frustumCulled = false;
+pool.add(water);
+
+// cielo fotográfico (Poly Haven, CC0): se refleja en el agua y da luz al casco
+new RGBELoader().load('assets/3d/cielo.hdr', tex => {
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  scene.environment = pmrem.fromEquirectangular(tex).texture;
+  tex.wrapS = THREE.RepeatWrapping; tex.minFilter = tex.magFilter = THREE.LinearFilter; tex.generateMipmaps = false; tex.needsUpdate = true;
+  waterMat.uniforms.tSky.value = tex; waterMat.uniforms.uHasSky.value = 1;
+}, undefined, () => {});
+
+// ---- rocío: nubecitas de gotas finas que salen cuando la ola golpea fuerte el borde ----
+const NP = 70, pPos = new Float32Array(NP * 3), pVel = new Float32Array(NP * 3), pLife = new Float32Array(NP), pMax = new Float32Array(NP), pSize = new Float32Array(NP), pA = new Float32Array(NP), pRot = new Float32Array(NP);
+let pNext = 0;
+const sprayTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 2, 64, 64, 60); gr.addColorStop(0, 'rgba(255,255,255,.2)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  for (let i = 0; i < 420; i++) {
+    const a = Math.random() * Math.PI * 2, r = Math.pow(Math.random(), 0.75) * 54, x = 64 + Math.cos(a) * r, y = 64 + Math.sin(a) * r * 0.9, s = 0.35 + Math.random() * 1.25;
+    g.fillStyle = `rgba(255,255,255,${0.25 + Math.random() * 0.6})`; g.beginPath(); g.ellipse(x, y, s, s * (1 + Math.random() * 1.6), a, 0, Math.PI * 2); g.fill();
+  }
+  return new THREE.CanvasTexture(c);
+})();
+const sprayGeo = new THREE.BufferGeometry();
+sprayGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+sprayGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
+sprayGeo.setAttribute('aAlpha', new THREE.BufferAttribute(pA, 1));
+sprayGeo.setAttribute('aRot', new THREE.BufferAttribute(pRot, 1));
+const spray = new THREE.Points(sprayGeo, new THREE.ShaderMaterial({
+  uniforms: { tMap: { value: sprayTex }, uScale: { value: 1 } }, transparent: true, depthWrite: false,
+  vertexShader: `attribute float aSize, aAlpha, aRot; varying float vA; varying float vR; uniform float uScale;
+    void main() { vA = aAlpha; vR = aRot; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = aSize * uScale / -mv.z; gl_Position = projectionMatrix * mv; }`,
+  fragmentShader: `uniform sampler2D tMap; varying float vA; varying float vR;
+    void main() { vec2 p = gl_PointCoord - 0.5; float c = cos(vR), s = sin(vR); p = vec2(p.x * c - p.y * s, p.x * s + p.y * c) + 0.5;
+      float a = texture2D(tMap, clamp(p, 0., 1.)).a * vA; if (a < 0.01) discard; gl_FragColor = vec4(vec3(0.93, 0.975, 1.0), a);
+      #include <colorspace_fragment>
+    }`
+}));
+spray.frustumCulled = false;
+pool.add(spray);
+function puff(x, y, z, vx, vy, vz, strength) {
+  const k = pNext, o = k * 3; pNext = (pNext + 1) % NP;
+  pPos[o] = x; pPos[o + 1] = y; pPos[o + 2] = z; pVel[o] = vx; pVel[o + 1] = vy; pVel[o + 2] = vz;
+  pMax[k] = pLife[k] = 0.45 + Math.random() * 0.3; pSize[k] = 0.35 + strength * 0.5; pRot[k] = Math.random() * 6.28;
+}
+function poke(x, z, amount) {
+  const ci = Math.round((x - XMIN) / L * (NX - 1)), cj = Math.round((z / W + 0.5) * (NZ - 1));
+  for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) { const i = ci + a, j = cj + b; if (i < 0 || j < 0 || i >= NX || j >= NZ) continue; hgt[i * NZ + j] += amount * Math.exp(-(a * a + b * b) / 2.2); }
+}
+const H_SPLASH = 0.12;
+let puffBudget = 0;
+function simulate(dt, alpha, omega) {
+  const damp = Math.exp(-0.42 * dt);
+  for (let i = 1; i < NX; i++) { const xf = XMIN + i * DX; for (let j = 0; j < NZ; j++) {
+    const z = (j + 0.5) * DZ - W / 2, o = i * NZ + j;
+    uu[o] = (uu[o] + dt * (-G * (hgt[i * NZ + j] - hgt[(i - 1) * NZ + j]) / DX - alpha * z * 0.017 + omega * omega * xf * 0.02)) * damp; } }
+  for (let i = 0; i < NX; i++) { const x = XMIN + (i + 0.5) * DX; for (let j = 1; j < NZ; j++) {
+    const zf = j * DZ - W / 2, o = i * (NZ + 1) + j;
+    ww[o] = (ww[o] + dt * (-G * (hgt[i * NZ + j] - hgt[i * NZ + j - 1]) / DZ + alpha * x * 0.017 + omega * omega * zf * 0.02)) * damp; } }
+  const fdecay = Math.exp(-0.9 * dt);
+  for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+    const o = i * NZ + j;
+    hgt[o] -= dt * H0 * ((uu[(i + 1) * NZ + j] - uu[o]) / DX + (ww[i * (NZ + 1) + j + 1] - ww[i * (NZ + 1) + j]) / DZ);
+    let src = 0;
+    if (hgt[o] > H_SPLASH) {
+      const ex = hgt[o] - H_SPLASH; hgt[o] = H_SPLASH;
+      const nx = i < 2 ? -1 : i > NX - 3 ? 1 : 0, nz = j < 2 ? -1 : j > NZ - 3 ? 1 : 0;
+      const ux = (uu[o] + uu[(i + 1) * NZ + j]) * 0.5, wz = (ww[i * (NZ + 1) + j] + ww[i * (NZ + 1) + j + 1]) * 0.5;
+      const hitSpeed = Math.max(ux * nx + wz * nz, 0) + Math.sqrt(ex) * 0.9;
+      src = 0.55 + hitSpeed;
+      if ((nx || nz) && hitSpeed > 0.2 && puffBudget > 0 && Math.random() < 0.06) {
+        puffBudget--;
+        puff(gx[i], 0.02, gz[o], nx * (0.3 + hitSpeed * 1.2) + ux * 0.4, 1.2 + hitSpeed * 3.2, nz * (0.3 + hitSpeed * 1.2) + wz * 0.4, Math.min(hitSpeed * 2.5, 1.6));
+      }
+    } else if (hgt[o] < -0.26) hgt[o] = -0.26;
+    const rise = (hgt[o] - hPrev[o]) / dt; hPrev[o] = hgt[o];
+    const nearWall = (i < 4 || j < 3 || i > NX - 5 || j > NZ - 4) ? 1 : 0.25;
+    src = Math.max(src, Math.max(rise - 0.55, 0) * 1.1 * nearWall * (hgt[o] > 0.04 ? 1 : 0.3));
+    foam[o] = Math.min(Math.max(foam[o] * fdecay, src), 1.2);
+  }
+}
+function updateSpray(dt) {
+  for (let k = 0; k < NP; k++) {
+    if (pLife[k] <= 0) { pA[k] = 0; continue; }
+    const o = k * 3; pLife[k] -= dt; pVel[o + 1] -= 6.5 * dt;
+    pPos[o] += pVel[o] * dt; pPos[o + 1] += pVel[o + 1] * dt; pPos[o + 2] += pVel[o + 2] * dt;
+    const q = 1 - Math.max(pLife[k], 0) / pMax[k];
+    pSize[k] += dt * 0.9; pA[k] = Math.sin(Math.min(q * 3.2, 1) * Math.PI * 0.5) * (1 - q) * 0.95;
+  }
+  sprayGeo.attributes.position.needsUpdate = true; sprayGeo.attributes.aSize.needsUpdate = true; sprayGeo.attributes.aAlpha.needsUpdate = true;
+}
+function updateWaterMesh() {
+  const tex = heightTex.image.data;
+  for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+    const o = i * NZ + j, p = o * 3; tex[o] = hgt[o];
+    wPos[p] = gx[i]; wPos[p + 1] = Math.min(WATER_Y + hgt[o], 0.02); wPos[p + 2] = gz[o];
+    const hx = (hgt[Math.min(i + 1, NX - 1) * NZ + j] - hgt[Math.max(i - 1, 0) * NZ + j]) / (2 * DX);
+    const hz = (hgt[i * NZ + Math.min(j + 1, NZ - 1)] - hgt[i * NZ + Math.max(j - 1, 0)]) / (2 * DZ);
+    const l = 1 / Math.hypot(hx, 1, hz); wNor[p] = -hx * l; wNor[p + 1] = l; wNor[p + 2] = -hz * l;
+  }
+  heightTex.needsUpdate = true;
+  waterGeo.attributes.position.needsUpdate = true; waterGeo.attributes.normal.needsUpdate = true; waterGeo.attributes.aFoam.needsUpdate = true;
+}
+
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(L + 12, W + 12), new THREE.MeshBasicMaterial({
+  transparent: true, depthWrite: false,
+  map: (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const gr = g.createRadialGradient(64, 64, 8, 64, 64, 64); gr.addColorStop(0, 'rgba(40,60,75,.22)'); gr.addColorStop(.55, 'rgba(40,60,75,.07)'); gr.addColorStop(1, 'rgba(40,60,75,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })()
+}));
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = -D_DEEP - 0.25;
+pool.add(shadow);
+
+// ---- cámara y controles ----
+let yaw = -0.5, yawVel = 0, elev = 0.56, zoom = 1, dragging = false, lastX = 0, lastY = 0, touched = false, downX = 0, downY = 0;
+const pointers = new Map(); let pinch0 = 0, zoom0 = 1;
+function fit() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  const bw = Math.max(1, Math.floor(w * PR)), bh = Math.max(1, Math.floor(h * PR));
+  rt.setSize(bw, bh); waterMat.uniforms.uRes.value.set(bw, bh); spray.material.uniforms.uScale.value = bh * 0.5 / Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
+  const dist = Math.max(((L + 3.4) * 0.56) / Math.tan(hfov / 2), (L + 3.4) * 1.1) * zoom;
+  camera.position.set(0, Math.sin(elev) * dist - 0.6, Math.cos(elev) * dist);
+  camera.lookAt(0, -0.8, 0); camera.updateProjectionMatrix();
+}
+addEventListener('resize', fit);
+stage.addEventListener('pointerdown', e => {
+  stage.setPointerCapture(e.pointerId); pointers.set(e.pointerId, e); downX = e.clientX; downY = e.clientY;
+  if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); zoom0 = zoom; }
+  dragging = true; lastX = e.clientX; lastY = e.clientY; stage.classList.add('is-drag');
+  if (!touched) { touched = true; document.getElementById('hint').classList.add('is-off'); }
+});
+stage.addEventListener('pointermove', e => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, e);
+  if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    zoom = THREE.MathUtils.clamp(zoom0 * pinch0 / Math.max(Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), 1), 0.5, 1.6); fit(); return;
+  }
+  const dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
+  yawVel = dx * 0.0085 * 60; yaw += dx * 0.0085;
+  elev = THREE.MathUtils.clamp(elev + dy * 0.005, 0.2, 1.3); fit();
+});
+const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -WATER_Y), hit = new THREE.Vector3();
+const up = e => {
+  if (pointers.size === 1 && Math.hypot(e.clientX - downX, e.clientY - downY) < 6) {
+    const r = stage.getBoundingClientRect();
+    ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+    if (ray.ray.intersectPlane(plane, hit)) { pool.worldToLocal(hit); if (Math.abs(hit.x) < L / 2 - 0.2 && Math.abs(hit.z) < W / 2 - 0.2) { poke(hit.x, hit.z, -0.12); puff(hit.x, WATER_Y + 0.05, hit.z, 0, 1.5, 0, 0.5); } }
+  }
+  pointers.delete(e.pointerId); if (!pointers.size) { dragging = false; stage.classList.remove('is-drag'); }
+};
+stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+stage.addEventListener('wheel', e => { e.preventDefault(); zoom = THREE.MathUtils.clamp(zoom * (1 + Math.sign(e.deltaY) * 0.08), 0.5, 1.6); fit(); }, { passive: false });
+
+// ---- animación ----
+let prevYaw = yaw, omega = 0, prevOmega = 0, t = 0, last = performance.now(), nextRain = 0;
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.04); last = now; t += dt;
+  if (!dragging) {
+    yaw += yawVel * dt; yawVel *= Math.pow(0.05, dt);
+    if (!touched) yawVel += Math.cos(t * 0.8) * 1.3 * dt;
+  }
+  if (dt > 0.0005) {
+    omega = lerp(omega, (yaw - prevYaw) / dt, 0.45); prevYaw = yaw;
+    const alpha = THREE.MathUtils.clamp((omega - prevOmega) / dt, -55, 55); prevOmega = omega;
+    const w = THREE.MathUtils.clamp(omega, -4.5, 4.5), sub = 3;
+    puffBudget = 1;
+    for (let k = 0; k < sub; k++) simulate(dt / sub, alpha, w);
+  }
+  if (t > nextRain) { poke(lerp(XMIN + 1, XMAX - 1, Math.random()), (Math.random() - 0.5) * (W - 1), (Math.random() - 0.5) * 0.02); nextRain = t + 0.5 + Math.random(); }
+  updateSpray(dt); updateWaterMesh();
+  shellU.uTime.value = t; waterMat.uniforms.uTime.value = t; waterMat.uniforms.uYaw.value = yaw;
+  pool.rotation.y = yaw;
+  water.visible = false; spray.visible = false;
+  renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, camera);
+  renderer.setRenderTarget(null); water.visible = true; spray.visible = true;
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+fit();
+requestAnimationFrame(frame);
+window.__pool3d = { ready: true, stats: () => { let mx = 0, n = 0, fm = 0; for (let i = 0; i < hgt.length; i++) { mx = Math.max(mx, Math.abs(hgt[i])); fm = Math.max(fm, foam[i]); } for (let k = 0; k < NP; k++) if (pLife[k] > 0) n++; return { maxH: +mx.toFixed(3), foam: +fm.toFixed(2), puffs: n, sky: waterMat.uniforms.uHasSky.value, nan: hgt.some(v => v !== v) }; }, spin: v => { touched = true; yawVel = v; } };
+</script>
+</body>
+</html>

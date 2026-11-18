@@ -1734,12 +1734,24 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
   .modal__shape-plan { max-width: 340px; margin-inline: auto; }
   .mcard__planos { width: 120px; }
 }
+
+/* ---------- p56: visor 3D del modelo ---------- */
+.modal__3d[hidden] { display: none; }
+.modal__3d svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; margin-left: 2px; }
+.v3d { position: fixed; inset: 0; z-index: 130; display: grid; place-items: center; padding: 20px; visibility: hidden; }
+.v3d[aria-hidden="true"] { pointer-events: none; }
+.v3d__backdrop { position: absolute; inset: 0; background: rgba(4, 20, 34, .88); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.v3d__box { position: relative; width: min(1100px, 100%); height: min(720px, calc(100svh - 40px)); border-radius: 20px; overflow: hidden; background: #eaf4f9; box-shadow: 0 50px 110px -40px rgba(0, 0, 0, .75); }
+.v3d__frame { display: block; width: 100%; height: 100%; border: 0; }
+.v3d__close { position: absolute; right: 14px; top: 14px; z-index: 2; display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .92); color: var(--ink); cursor: pointer; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .4); }
+.v3d__close svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+@media (max-width: 760px) { .v3d { padding: 0; } .v3d__box { width: 100%; height: 100svh; border-radius: 0; } }
 </style>
   <script>
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261130c'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261201a'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -2351,6 +2363,15 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </footer>
 
+  <!-- visor 3D del modelo -->
+  <div class="v3d" id="v3d" aria-hidden="true">
+    <div class="v3d__backdrop" data-vclose></div>
+    <div class="v3d__box">
+      <button class="v3d__close" type="button" data-vclose aria-label="Cerrar vista 3D"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <iframe class="v3d__frame" title="Vista 3D del modelo" loading="lazy"></iframe>
+    </div>
+  </div>
+
   <!-- visor de ficha técnica (lámina) -->
   <div class="ficha" id="ficha" aria-hidden="true">
     <div class="ficha__backdrop" data-fclose></div>
@@ -2416,6 +2437,7 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
           <a class="btn btn--cta modal__quote" href="#contacto">Cotizar este modelo
             <svg class="i-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
+          <button class="btn btn--outline modal__3d" type="button" hidden>Ver en 3D <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12L4 7.5M12 12v9"/></svg></button>
           <button class="btn btn--outline modal__ficha" type="button">Ver ficha técnica <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h6l4 4v14H6V3z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg></button>
           <a class="btn btn--wa modal__wa" href="#" target="_blank" rel="noopener">
             <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1a12.9 12.9 0 0 0 6.1 1.5c7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.2 1.3-3.9-.3-.4a10.3 10.3 0 0 1-1.7-5.7C5.4 10 10.2 5.3 16 5.3S26.6 10 26.6 15.6 21.8 26.1 16 26.1zm5.8-7.7c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.6.1-.2 0-.4 0-.6l-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.9 5.1 2.2.9 3 1 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
@@ -2430,6 +2452,6 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </div>
 
-  <script src="js/asistente.js?v=20261130c" defer></script>
+  <script src="js/asistente.js?v=20261201a" defer></script>
 </body>
 </html>
