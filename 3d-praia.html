@@ -29,7 +29,7 @@
 <div class="hud hud--top"><small>Vista 3D referencial</small><h1>Praia</h1></div>
 <div class="hud hud--bottom">
   <span class="chip"><b>12 × 4 m</b> · profundidad <b>0,9 a 2,0 m</b></span>
-  <span class="chip hint" id="hint">Arrastra para girar · rueda o pellizco para acercar</span>
+  <span class="chip hint" id="hint">Arrastra para girar (más rápido, más olas) · toca el agua</span>
 </div>
 <div id="fail">Tu navegador no pudo mostrar la vista 3D.</div>
 
@@ -129,24 +129,119 @@ const rim = new THREE.Mesh(rimGeo, new THREE.MeshStandardMaterial({ color: 0xf2f
 rim.position.y = -0.005;
 pool.add(rim);
 
-// ---- agua: malla que se deforma (chapoteo + ondas) ----
-const NXW = 96, NZW = 14;
-const wPos = new Float32Array((NXW + 1) * (NZW + 1) * 3), wBase = [], wIdx = [];
-for (let i = 0; i <= NXW; i++) {
-  const x = lerp(XMIN + 0.09, XMAX - 0.03, i / NXW), hw = hwTop(x) - 0.03;
-  for (let j = 0; j <= NZW; j++) wBase.push(x, lerp(-hw, hw, j / NZW));
+// ---- texturas procedurales: micro-ondas (relieve) y cáusticas (luz en el fondo) ----
+function makeTex(fn, size) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d'), im = g.createImageData(size, size), d = im.data, k = Math.PI * 2 / size;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) { const o = (y * size + x) * 4, v = fn(x * k, y * k); d[o] = v[0]; d[o + 1] = v[1]; d[o + 2] = v[2]; d[o + 3] = 255; }
+  g.putImageData(im, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
 }
-for (let i = 0; i < NXW; i++) for (let j = 0; j < NZW; j++) {
-  const a = i * (NZW + 1) + j, b = a + 1, c = a + NZW + 1, d2 = c + 1;
-  wIdx.push(a, b, c, b, d2, c);
+const rippleH = (x, y) => Math.sin(3 * x + 2 * y) * 0.5 + Math.sin(5 * x - 4 * y + 1.3) * 0.3 + Math.sin(7 * y + 2 * x + 0.7) * 0.25 + Math.sin(9 * x + 6 * y) * 0.15 + Math.sin(11 * y - 8 * x + 2.1) * 0.1;
+const normalTex = makeTex((x, y) => {
+  const e = 0.02, dx = (rippleH(x + e, y) - rippleH(x - e, y)) / (2 * e), dy = (rippleH(x, y + e) - rippleH(x, y - e)) / (2 * e);
+  const l = Math.hypot(dx * 0.35, dy * 0.35, 1);
+  return [(-dx * 0.35 / l * 0.5 + 0.5) * 255, (-dy * 0.35 / l * 0.5 + 0.5) * 255, (1 / l * 0.5 + 0.5) * 255];
+}, 256);
+normalTex.repeat.set(5, 1.7);
+const causticTex = makeTex((x, y) => {
+  const v = Math.sin(3 * x + 1.6 * Math.sin(2 * y)) + Math.sin(4 * y + 1.4 * Math.sin(3 * x + 1)) + Math.sin(2 * x - 3 * y + 1.8 * Math.sin(2 * x + 2 * y));
+  const c = Math.pow(1 - Math.min(Math.abs(v) / 2.4, 1), 5) * 255;
+  return [c, c, c];
+}, 256);
+causticTex.colorSpace = THREE.SRGBColorSpace;
+
+// luz que baila en el fondo (solo por dentro del casco)
+const uv = []; for (let i = 0; i < pos.length; i += 3) uv.push(pos[i] * 0.3, pos[i + 2] * 0.3);
+shellGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+const caustics = new THREE.Mesh(shellGeo, new THREE.MeshBasicMaterial({ map: causticTex, color: 0xcff6ff, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, side: THREE.BackSide, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+pool.add(caustics);
+
+// ---- agua simulada: ecuaciones de aguas someras en una grilla (las olas viajan y rebotan en las paredes) ----
+const NX = 120, NZ = 40, DX = L / NX, DZ = W / NZ;
+const G = 6.5, H0 = 2.0;                      // gravedad y profundidad "visuales" (definen la velocidad de la ola)
+const hgt = new Float32Array(NX * NZ), uu = new Float32Array((NX + 1) * NZ), ww = new Float32Array(NX * (NZ + 1));
+const wPos = new Float32Array(NX * NZ * 3), wNor = new Float32Array(NX * NZ * 3), wUv = new Float32Array(NX * NZ * 2), wIdx = [];
+const gx = new Float32Array(NX), gz = new Float32Array(NX * NZ);
+for (let i = 0; i < NX; i++) {
+  const x = lerp(XMIN + 0.03, XMAX - 0.03, i / (NX - 1)), hw = hwTop(x) - 0.03; gx[i] = x;
+  for (let j = 0; j < NZ; j++) { const z = lerp(-hw, hw, j / (NZ - 1)), o = i * NZ + j; gz[o] = z; wUv[o * 2] = x / L; wUv[o * 2 + 1] = z / W; }
 }
+for (let i = 0; i < NX - 1; i++) for (let j = 0; j < NZ - 1; j++) { const a = i * NZ + j, b = a + 1, c = a + NZ, d2 = c + 1; wIdx.push(a, b, c, b, d2, c); }
 const waterGeo = new THREE.BufferGeometry();
 waterGeo.setAttribute('position', new THREE.BufferAttribute(wPos, 3));
+waterGeo.setAttribute('normal', new THREE.BufferAttribute(wNor, 3));
+waterGeo.setAttribute('uv', new THREE.BufferAttribute(wUv, 2));
 waterGeo.setIndex(wIdx);
 const water = new THREE.Mesh(waterGeo, new THREE.MeshPhysicalMaterial({
-  color: 0x0a9fdc, transparent: true, opacity: 0.5, roughness: 0.1, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 0.75, depthWrite: false
+  color: 0x0c8fd6, transparent: true, opacity: 0.66, roughness: 0.04, metalness: 0.0, clearcoat: 1, clearcoatRoughness: 0.03,
+  envMapIntensity: 1.25, normalMap: normalTex, normalScale: new THREE.Vector2(0.22, 0.22), depthWrite: false, side: THREE.DoubleSide
 }));
+water.renderOrder = 2;
 pool.add(water);
+
+// ---- salpicaduras: gotas que saltan cuando la ola llega al borde ----
+const NP = 700, pPos = new Float32Array(NP * 3).fill(-999), pVel = new Float32Array(NP * 3), pLife = new Float32Array(NP);
+let pNext = 0;
+const dropGeo = new THREE.BufferGeometry(); dropGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const dropTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 2, 32, 32, 30); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.3, 'rgba(170,228,250,.95)'); gr.addColorStop(.7, 'rgba(40,160,220,.55)'); gr.addColorStop(1, 'rgba(20,130,200,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+const drops = new THREE.Points(dropGeo, new THREE.PointsMaterial({ map: dropTex, size: 0.2, sizeAttenuation: true, transparent: true, depthWrite: false, color: 0xffffff }));
+drops.frustumCulled = false; drops.renderOrder = 3;
+pool.add(drops);
+function spawnDrop(x, y, z, vx, vy, vz) {
+  const o = pNext * 3; pPos[o] = x; pPos[o + 1] = y; pPos[o + 2] = z; pVel[o] = vx; pVel[o + 1] = vy; pVel[o + 2] = vz; pLife[pNext] = 1.3; pNext = (pNext + 1) % NP;
+}
+function poke(x, z, amount) {                 // deja una onda donde cae algo
+  const ci = Math.round((x - XMIN) / L * (NX - 1)), cj = Math.round((z / W + 0.5) * (NZ - 1));
+  for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) { const i = ci + a, j = cj + b; if (i < 0 || j < 0 || i >= NX || j >= NZ) continue; hgt[i * NZ + j] += amount * Math.exp(-(a * a + b * b) / 2.2); }
+}
+const H_SPLASH = 0.12;                        // altura sobre el nivel en reposo a la que el agua toca el borde
+function simulate(dt, alpha, omega) {
+  const damp = Math.exp(-0.42 * dt);
+  for (let i = 1; i < NX; i++) { const xf = XMIN + i * DX; for (let j = 0; j < NZ; j++) {
+    const z = (j + 0.5) * DZ - W / 2, o = i * NZ + j;
+    uu[o] = (uu[o] + dt * (-G * (hgt[i * NZ + j] - hgt[(i - 1) * NZ + j]) / DX - alpha * z * 0.017 + omega * omega * xf * 0.02)) * damp; } }
+  for (let i = 0; i < NX; i++) { const x = XMIN + (i + 0.5) * DX; for (let j = 1; j < NZ; j++) {
+    const zf = j * DZ - W / 2, o = i * (NZ + 1) + j;
+    ww[o] = (ww[o] + dt * (-G * (hgt[i * NZ + j] - hgt[i * NZ + j - 1]) / DZ + alpha * x * 0.017 + omega * omega * zf * 0.02)) * damp; } }
+  let spawned = 0;
+  for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+    const o = i * NZ + j;
+    hgt[o] -= dt * H0 * ((uu[(i + 1) * NZ + j] - uu[o]) / DX + (ww[i * (NZ + 1) + j + 1] - ww[i * (NZ + 1) + j]) / DZ);
+    if (hgt[o] > H_SPLASH) {                  // la ola pasó el borde: el exceso sale volando en gotas
+      const ex = hgt[o] - H_SPLASH; hgt[o] = H_SPLASH;
+      const edge = i < 2 || j < 2 || i > NX - 3 || j > NZ - 3;
+      if (edge && spawned < 9 && Math.random() < 0.06 + ex * 5) {
+        const x = gx[i], z = gz[o], nx = i < 2 ? -1 : i > NX - 3 ? 1 : 0, nz = j < 2 ? -1 : j > NZ - 3 ? 1 : 0, n = 1 + Math.min(3, (ex * 30) | 0);
+        for (let k = 0; k < n; k++) spawnDrop(x, 0.03, z, nx * (0.3 + Math.random() * 1.3) + (Math.random() - 0.5) * 0.9, 1.6 + Math.random() * 2.2 + ex * 16, nz * (0.3 + Math.random() * 1.3) + (Math.random() - 0.5) * 0.9);
+        spawned += n;
+      }
+    } else if (hgt[o] < -0.26) hgt[o] = -0.26;
+  }
+}
+function updateDrops(dt) {
+  for (let k = 0; k < NP; k++) {
+    if (pLife[k] <= 0) continue;
+    const o = k * 3; pLife[k] -= dt; pVel[o + 1] -= 7.5 * dt;
+    pPos[o] += pVel[o] * dt; pPos[o + 1] += pVel[o + 1] * dt; pPos[o + 2] += pVel[o + 2] * dt;
+    const inside = Math.abs(pPos[o]) < L / 2 - 0.05 && Math.abs(pPos[o + 2]) < W / 2 - 0.05;
+    if (pVel[o + 1] < 0 && pPos[o + 1] < WATER_Y && inside) { poke(pPos[o], pPos[o + 2], -0.012); pLife[k] = 0; }
+    if (pLife[k] <= 0 || pPos[o + 1] < -D_DEEP - 0.4) { pLife[k] = 0; pPos[o + 1] = -999; }
+  }
+  dropGeo.attributes.position.needsUpdate = true;
+}
+function updateWaterMesh() {
+  for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+    const o = i * NZ + j, p = o * 3;
+    wPos[p] = gx[i]; wPos[p + 1] = Math.min(WATER_Y + hgt[o], 0.02); wPos[p + 2] = gz[o];
+    const hx = (hgt[Math.min(i + 1, NX - 1) * NZ + j] - hgt[Math.max(i - 1, 0) * NZ + j]) / (2 * DX) * 1.6;
+    const hz = (hgt[i * NZ + Math.min(j + 1, NZ - 1)] - hgt[i * NZ + Math.max(j - 1, 0)]) / (2 * DZ) * 1.6;
+    const l = 1 / Math.hypot(hx, 1, hz); wNor[p] = -hx * l; wNor[p + 1] = l; wNor[p + 2] = -hz * l;
+  }
+  waterGeo.attributes.position.needsUpdate = true; waterGeo.attributes.normal.needsUpdate = true;
+}
 
 // sombra suave bajo el casco
 const shadow = new THREE.Mesh(new THREE.PlaneGeometry(L + 9, W + 9), new THREE.MeshBasicMaterial({
@@ -188,41 +283,45 @@ stage.addEventListener('pointermove', e => {
   yaw += dx * 0.0085;
   elev = THREE.MathUtils.clamp(elev + dy * 0.005, 0.2, 1.3); fit();
 });
-const up = e => { pointers.delete(e.pointerId); if (!pointers.size) { dragging = false; stage.classList.remove('is-drag'); } };
+const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0.14), hit = new THREE.Vector3();
+let downX = 0, downY = 0;
+stage.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
+const up = e => {
+  if (pointers.size === 1 && Math.hypot(e.clientX - downX, e.clientY - downY) < 6) {
+    const r = stage.getBoundingClientRect();
+    ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+    if (ray.ray.intersectPlane(plane, hit)) { pool.worldToLocal(hit); if (Math.abs(hit.x) < L / 2 - 0.2 && Math.abs(hit.z) < W / 2 - 0.2) { poke(hit.x, hit.z, -0.11); for (let k = 0; k < 7; k++) spawnDrop(hit.x, WATER_Y, hit.z, (Math.random() - 0.5) * 1.4, 1.8 + Math.random() * 1.6, (Math.random() - 0.5) * 1.4); } }
+  }
+  pointers.delete(e.pointerId); if (!pointers.size) { dragging = false; stage.classList.remove('is-drag'); } };
 stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
 stage.addEventListener('wheel', e => { e.preventDefault(); zoom = THREE.MathUtils.clamp(zoom * (1 + Math.sign(e.deltaY) * 0.08), 0.55, 1.6); fit(); }, { passive: false });
 
-// ---- chapoteo: el agua queda "atrás" cuando giras el casco y luego vuelve (resorte amortiguado) ----
-let sx = 0, vx = 0, sz = 0, vz = 0, prevYawVel = 0, energy = 0, t = 0, last = performance.now();
-const K = 10, C = 1.25;
+// ---- animación: el giro del casco empuja el agua (fuerzas de inercia), que luego oscila y rebota ----
+let prevYaw = yaw, omega = 0, prevOmega = 0, t = 0, last = performance.now(), nextRain = 0;
 function frame(now) {
-  const dt = Math.min((now - last) / 1000, 0.05); last = now; t += dt;
+  const dt = Math.min((now - last) / 1000, 0.04); last = now; t += dt;
   if (!dragging) {
-    yaw += yawVel * dt; yawVel *= Math.pow(0.04, dt);
-    if (!touched) yawVel += Math.cos(t * 0.9) * 0.9 * dt;       // vaivén suave mientras nadie lo toca
+    yaw += yawVel * dt; yawVel *= Math.pow(0.05, dt);
+    if (!touched) yawVel += Math.cos(t * 0.8) * 1.3 * dt;         // vaivén suave mientras nadie lo toca
   }
-  const dW = yawVel - prevYawVel; prevYawVel = yawVel;
-  vz += dW * 0.055; vx += dW * 0.011;                             // el giro empuja el agua
-  vx += (-K * sx - C * vx) * dt; sx += vx * dt;
-  vz += (-K * 1.9 * sz - C * vz) * dt; sz += vz * dt;
-  sx = THREE.MathUtils.clamp(sx, -0.014, 0.014); sz = THREE.MathUtils.clamp(sz, -0.05, 0.05);
-  energy = lerp(energy, Math.min(Math.abs(vz) * 6 + Math.abs(vx) * 22 + Math.abs(yawVel) * 0.12, 1), 0.08);
-  const amp = 0.008 + energy * 0.03;
-  for (let i = 0, n = wBase.length / 2; i < n; i++) {
-    const x = wBase[i * 2], z = wBase[i * 2 + 1];
-    let h = sx * x + sz * z
-      + Math.sin(Math.PI * x / L) * vx * 0.9                       // onda larga que va y vuelve
-      + amp * (Math.sin(x * 1.9 + t * 1.7) * 0.5 + Math.sin(x * 3.3 - z * 2.1 + t * 2.3) * 0.3 + Math.sin(z * 4.2 + x * 0.7 + t * 2.9) * 0.2);
-    wPos[i * 3] = x; wPos[i * 3 + 1] = Math.min(WATER_Y + h, -0.025); wPos[i * 3 + 2] = z;
+  if (dt > 0.0005) {
+    omega = lerp(omega, (yaw - prevYaw) / dt, 0.45); prevYaw = yaw;
+    const alpha = THREE.MathUtils.clamp((omega - prevOmega) / dt, -55, 55); prevOmega = omega;
+    const w = THREE.MathUtils.clamp(omega, -4.5, 4.5), sub = 3;
+    for (let k = 0; k < sub; k++) simulate(dt / sub, alpha, w);
   }
-  waterGeo.attributes.position.needsUpdate = true; waterGeo.computeVertexNormals();
+  if (t > nextRain) { poke(lerp(XMIN + 1, XMAX - 1, Math.random()), (Math.random() - 0.5) * (W - 1), (Math.random() - 0.5) * 0.02); nextRain = t + 0.5 + Math.random(); }
+  updateDrops(dt); updateWaterMesh();
+  normalTex.offset.set(t * 0.035, t * 0.021);
+  causticTex.offset.set(t * 0.03 + Math.sin(t * 0.5) * 0.02, t * -0.022);
+  caustics.material.opacity = 0.36 + Math.sin(t * 1.3) * 0.06;
   pool.rotation.y = yaw;
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 fit();
 requestAnimationFrame(frame);
-window.__pool3d = { ready: true };
+window.__pool3d = { ready: true, stats: () => { let mx = 0, n = 0; for (let i = 0; i < hgt.length; i++) mx = Math.max(mx, Math.abs(hgt[i])); for (let k = 0; k < NP; k++) if (pLife[k] > 0) n++; return { maxH: +mx.toFixed(3), drops: n, omega: +omega.toFixed(2), nan: hgt.some(v => v !== v) }; }, spin: v => { touched = true; yawVel = v; } };
 </script>
 </body>
 </html>
