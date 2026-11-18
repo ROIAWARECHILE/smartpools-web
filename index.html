@@ -1746,12 +1746,25 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .v3d__close { position: absolute; right: 14px; top: 14px; z-index: 2; display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .92); color: var(--ink); cursor: pointer; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .4); }
 .v3d__close svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 @media (max-width: 760px) { .v3d { padding: 0; } .v3d__box { width: 100%; height: 100svh; border-radius: 0; } }
+
+/* ---------- p58: recuadro 3D dentro de la ficha ---------- */
+.modal__3dbox { position: relative; display: grid; place-items: center; align-content: center; gap: 10px; margin-top: 16px; aspect-ratio: 16 / 10; border-radius: 16px; overflow: hidden; background: radial-gradient(ellipse 80% 70% at 50% 40%, #ffffff 0%, #eaf4f9 60%, #d8e9f2 100%); border: 1px solid #dfeaf1; }
+.modal__3dbox[hidden] { display: none; }
+.modal__3dposter { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 12% 16%; opacity: .3; pointer-events: none; }
+.modal__3dplay { position: relative; z-index: 1; }
+.modal__3dplay svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-left: 2px; }
+.modal__3dnote { position: relative; z-index: 1; font-size: 12.5px; color: #4a5873; }
+.modal__3dframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 2; }
+.modal__3dframe[hidden], .modal__3dmax[hidden] { display: none; }
+.modal__3dmax { position: absolute; right: 10px; top: 10px; z-index: 3; display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .92); color: var(--ink); cursor: pointer; box-shadow: 0 6px 16px -8px rgba(0, 0, 0, .4); }
+.modal__3dmax svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 860px) { .modal__3dbox { aspect-ratio: 4 / 3; } }
 </style>
   <script>
     // Escritorio: librerías pedidas desde aquí con prioridad baja y main.js al terminar de leer la página (equivale a defer).
     // Celular: todo se carga con el primer gesto del visitante (o a los 8 s), para no bloquear el primer pintado.
     (function () {
-      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261201b'];
+      var srcs = ['https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js', 'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js', 'js/main.js?v=20261201c'];
       function add(u, prio) { var el = document.createElement('script'); el.src = u; el.async = false; if (prio) el.fetchPriority = prio; document.head.appendChild(el); }
       function load() { srcs.forEach(function (u) { add(u, 'low'); }); }
       var phone = window.matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)').matches;
@@ -2415,6 +2428,13 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
           <img class="modal__shape-plan" alt="" loading="lazy">
           <img class="modal__shape-perfil" alt="" loading="lazy">
         </div>
+        <div class="modal__3dbox" hidden>
+          <img class="modal__3dposter" alt="" loading="lazy">
+          <button class="btn btn--cta modal__3dplay" type="button">Explorar en 3D <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12L4 7.5M12 12v9"/></svg></button>
+          <small class="modal__3dnote">Gírala con el dedo o el mouse y mueve el agua</small>
+          <iframe class="modal__3dframe" title="Vista 3D del modelo" hidden></iframe>
+          <button class="modal__3dmax" type="button" aria-label="Ver la vista 3D en grande" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+        </div>
       </section>
       <div class="modal__body">
         <p class="modal__eyebrow"></p>
@@ -2452,6 +2472,6 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
     </div>
   </div>
 
-  <script src="js/asistente.js?v=20261201b" defer></script>
+  <script src="js/asistente.js?v=20261201c" defer></script>
 </body>
 </html>
