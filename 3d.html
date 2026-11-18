@@ -42,22 +42,16 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ---- medidas de cada modelo (planos de forma y medidas); el casco viene de Blender ----
-const MODELOS = {
-  'praia':      { nombre: 'Praia',      L: 12,  W: 4.0, din: 0.9, dd: 2.0 },
-  'los-roques': { nombre: 'Los Roques', L: 10,  W: 3.4, din: 1.2, dd: 1.8 },
-  'catalonia':  { nombre: 'Catalonia',  L: 8,   W: 3.4, din: 1.2, dd: 1.7 },
-  'tulum':      { nombre: 'Tulum',      L: 6,   W: 3.0, din: 1.2, dd: 1.7 },
-  'buzios':     { nombre: 'Buzios',     L: 5.5, W: 3.0, din: 1.2, dd: 1.6 },
-  'rio':        { nombre: 'Rio',        L: 7,   W: 3.4, din: 1.2, dd: 1.75 }
-};
-const SLUG = (new URLSearchParams(location.search).get('m') || 'praia').toLowerCase();
-const CFG = MODELOS[SLUG] || MODELOS.praia, SLUG_OK = MODELOS[SLUG] ? SLUG : 'praia';
-const L = CFG.L, W = CFG.W, R = 0.38;
+// ---- medidas y contorno del modelo: los genera Blender junto con el casco (assets/3d/<modelo>.json) ----
+const SLUG_OK = (new URLSearchParams(location.search).get('m') || 'praia').toLowerCase().replace(/[^a-z-]/g, '');
+let CFG;
+try { const r = await fetch('assets/3d/' + SLUG_OK + '.json'); if (!r.ok) throw new Error(r.status); CFG = await r.json(); }
+catch (e) { document.getElementById('fail').style.display = 'grid'; throw e; }
+const L = CFG.L, W = CFG.W;
 const D_IN = CFG.din, D_DEEP = CFG.dd;
 const es = v => (Math.round(v * 100) / 100).toString().replace('.', ',');
 document.getElementById('nombre').textContent = CFG.nombre;
-document.getElementById('medidas').innerHTML = '<b>' + es(L) + ' × ' + es(W) + ' m</b> · profundidad <b>' + es(D_IN) + ' a ' + es(D_DEEP) + ' m</b>';
+document.getElementById('medidas').innerHTML = '<b>' + es(L) + ' × ' + es(W) + ' m</b> · profundidad <b>' + (D_IN === D_DEEP ? es(D_IN) : es(D_IN) + ' a ' + es(D_DEEP)) + ' m</b>';
 document.title = CFG.nombre + ' en 3D | Smart Pools';
 const XMIN = -L / 2, XMAX = L / 2;
 const WATER_Y = -0.14;
@@ -86,19 +80,26 @@ scene.add(sun);
 const pool = new THREE.Group();
 scene.add(pool);
 
-// ---- perfil del casco ----
-function hwTop(x) {
-  const dx = Math.min(x - XMIN, XMAX - x);
-  if (dx >= R) return W / 2;
-  const k = R - Math.max(dx, 0);
-  return W / 2 - R + Math.sqrt(Math.max(R * R - k * k, 0));
-}
 const lerp = (a, b, t) => a + (b - a) * Math.min(Math.max(t, 0), 1);
 // ---- agua simulada (aguas someras) ----
-const NX = 120, NZ = 40, DX = L / NX, DZ = W / NZ;
+const NX = Math.max(24, Math.min(120, Math.round(L / 0.1))), NZ = Math.max(22, Math.min(48, Math.round(W / 0.1))), DX = L / NX, DZ = W / NZ;
 const G = 6.5, H0 = 2.0;
 const hgt = new Float32Array(NX * NZ), hPrev = new Float32Array(NX * NZ), uu = new Float32Array((NX + 1) * NZ), ww = new Float32Array(NX * (NZ + 1));
 const foam = new Float32Array(NX * NZ);
+// celdas dentro de la piscina (según el contorno del plano) y, en las de la orilla, hacia dónde está la pared
+function dentro(x, z) {
+  for (const p of CFG.contorno) { let c = false; for (let a = 0, b = p.length - 1; a < p.length; b = a++) { if ((p[a][1] > z) !== (p[b][1] > z) && x < (p[b][0] - p[a][0]) * (z - p[a][1]) / (p[b][1] - p[a][1]) + p[a][0]) c = !c; } if (c) return true; }
+  return false;
+}
+const act = new Uint8Array(NX * NZ), enx = new Int8Array(NX * NZ), enz = new Int8Array(NX * NZ);
+for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) act[i * NZ + j] = dentro(-L / 2 + (i + 0.5) * DX, -W / 2 + (j + 0.5) * DZ) ? 1 : 0;
+const on = (i, j) => i >= 0 && j >= 0 && i < NX && j < NZ && act[i * NZ + j];
+for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+  if (!act[i * NZ + j]) continue;
+  let ax = 0, az = 0;
+  for (let k = 1; k <= 2; k++) { if (!on(i - k, j)) ax -= 1; if (!on(i + k, j)) ax += 1; if (!on(i, j - k)) az -= 1; if (!on(i, j + k)) az += 1; }
+  enx[i * NZ + j] = Math.sign(ax); enz[i * NZ + j] = Math.sign(az);
+}
 const heightTex = new THREE.DataTexture(new Float32Array(NX * NZ), NZ, NX, THREE.RedFormat, THREE.FloatType);
 heightTex.minFilter = heightTex.magFilter = THREE.LinearFilter; heightTex.needsUpdate = true;
 
@@ -110,7 +111,7 @@ shellMat.onBeforeCompile = sh => {
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vLocal; varying vec3 vON;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvLocal = position; vON = normal;');
   sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
     varying vec3 vLocal; varying vec3 vON; uniform sampler2D uHeight; uniform float uTime;
-    float hAt(vec2 xz) { return texture2D(uHeight, vec2(xz.y / ${W.toFixed(1)} + 0.5, xz.x / ${L.toFixed(1)} + 0.5)).r; }
+    float hAt(vec2 xz) { return texture2D(uHeight, vec2(xz.y / ${W.toFixed(3)} + 0.5, xz.x / ${L.toFixed(3)} + 0.5)).r; }
     float rip(vec2 p, float t) { return sin(p.x * 2.1 + t * 1.1 + sin(p.y * 1.7 + t * 0.7) * 1.3) + sin(p.y * 2.6 - t * 0.9 + sin(p.x * 1.9 - t * 0.6) * 1.2) + sin((p.x + p.y) * 1.5 + t * 0.8); }`)
     .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
     {
@@ -124,27 +125,20 @@ shellMat.onBeforeCompile = sh => {
     }`);
 };
 new GLTFLoader().load('assets/3d/' + SLUG_OK + '.glb', g => {
-  g.scene.traverse(o => { if (o.isMesh) { o.material = shellMat; o.frustumCulled = false; } });
+  g.scene.traverse(o => {
+    if (!o.isMesh) return;
+    const n = (o.name + ' ' + (o.parent ? o.parent.name : '')).toLowerCase(); o.frustumCulled = false;
+    if (n.includes('deck')) {
+      o.material = deckMat; const p = o.geometry.attributes.position, u = new Float32Array(p.count * 2);
+      for (let i = 0; i < p.count; i++) { u[i * 2] = p.getX(i) * 0.42; u[i * 2 + 1] = p.getZ(i) * 0.42; }
+      o.geometry.setAttribute('uv', new THREE.BufferAttribute(u, 2));
+    } else if (n.includes('borde')) o.material = rimMat;
+    else o.material = shellMat;
+  });
   pool.add(g.scene); window.__pool3d && (window.__pool3d.hull = true);
 }, undefined, () => { document.getElementById('fail').style.display = 'grid'; });
 
-// ---- borde del casco y deck de piedra alrededor ----
-function roundedRect(shape, l, w, r) {
-  const x = -l / 2, y = -w / 2;
-  shape.moveTo(x + r, y); shape.lineTo(x + l - r, y); shape.absarc(x + l - r, y + r, r, -Math.PI / 2, 0, false);
-  shape.lineTo(x + l, y + w - r); shape.absarc(x + l - r, y + w - r, r, 0, Math.PI / 2, false);
-  shape.lineTo(x + r, y + w); shape.absarc(x + r, y + w - r, r, Math.PI / 2, Math.PI, false);
-  shape.lineTo(x, y + r); shape.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false);
-  return shape;
-}
-const rimShape = roundedRect(new THREE.Shape(), L + 0.46, W + 0.46, R + 0.23);
-rimShape.holes.push(roundedRect(new THREE.Path(), L, W, R));
-const rimGeo = new THREE.ExtrudeGeometry(rimShape, { depth: 0.075, bevelEnabled: true, bevelThickness: 0.018, bevelSize: 0.018, bevelSegments: 3, curveSegments: 12 });
-rimGeo.rotateX(-Math.PI / 2);
-const rim = new THREE.Mesh(rimGeo, new THREE.MeshStandardMaterial({ color: 0xf4f9fb, roughness: 0.35, envMapIntensity: 0.7 }));
-rim.position.y = -0.005;
-pool.add(rim);
-
+// ---- materiales del borde y del deck (la geometría viene de Blender) ----
 const deckTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
   g.fillStyle = '#d9d2c6'; g.fillRect(0, 0, 512, 512);
@@ -153,21 +147,15 @@ const deckTex = (() => {
   for (let r = 0; r <= 4; r++) { g.beginPath(); g.moveTo(0, r * 128); g.lineTo(512, r * 128); g.stroke(); for (let q = -1; q < 3; q++) { const x = q * 256 + (r % 2) * 128; g.beginPath(); g.moveTo(x, r * 128); g.lineTo(x, r * 128 + 128); g.stroke(); } }
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 })();
-const deckShape = roundedRect(new THREE.Shape(), L + 3.4, W + 3.4, 0.5);
-deckShape.holes.push(roundedRect(new THREE.Path(), L + 0.44, W + 0.44, R + 0.22));
-const deckGeo = new THREE.ExtrudeGeometry(deckShape, { depth: 0.16, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2, curveSegments: 10 });
-deckGeo.rotateX(-Math.PI / 2);
-{ const p = deckGeo.attributes.position, u = deckGeo.attributes.uv; for (let i = 0; i < p.count; i++) u.setXY(i, p.getX(i) * 0.42, p.getZ(i) * 0.42); }
-const deck = new THREE.Mesh(deckGeo, new THREE.MeshStandardMaterial({ map: deckTex, roughness: 0.85, envMapIntensity: 0.45 }));
-deck.position.y = -0.165;
-pool.add(deck);
+const rimMat = new THREE.MeshStandardMaterial({ color: 0xf4f9fb, roughness: 0.35, envMapIntensity: 0.7 });
+const deckMat = new THREE.MeshStandardMaterial({ map: deckTex, roughness: 0.85, envMapIntensity: 0.45 });
 
 // ---- malla del agua ----
 const wPos = new Float32Array(NX * NZ * 3), wNor = new Float32Array(NX * NZ * 3), wIdx = [];
 const gx = new Float32Array(NX), gz = new Float32Array(NX * NZ);
 for (let i = 0; i < NX; i++) {
-  const x = lerp(XMIN + 0.02, XMAX - 0.02, i / (NX - 1)), hw = hwTop(x) - 0.02; gx[i] = x;
-  for (let j = 0; j < NZ; j++) gz[i * NZ + j] = lerp(-hw, hw, j / (NZ - 1));
+  gx[i] = lerp(XMIN, XMAX, i / (NX - 1));
+  for (let j = 0; j < NZ; j++) gz[i * NZ + j] = lerp(-W / 2, W / 2, j / (NZ - 1));
 }
 for (let i = 0; i < NX - 1; i++) for (let j = 0; j < NZ - 1; j++) { const a = i * NZ + j, b = a + 1, c = a + NZ, d2 = c + 1; wIdx.push(a, b, c, b, d2, c); }
 const waterGeo = new THREE.BufferGeometry();
@@ -291,7 +279,7 @@ function puff(x, y, z, vx, vy, vz, strength) {
 }
 function poke(x, z, amount) {
   const ci = Math.round((x - XMIN) / L * (NX - 1)), cj = Math.round((z / W + 0.5) * (NZ - 1));
-  for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) { const i = ci + a, j = cj + b; if (i < 0 || j < 0 || i >= NX || j >= NZ) continue; hgt[i * NZ + j] += amount * Math.exp(-(a * a + b * b) / 2.2); }
+  for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) { const i = ci + a, j = cj + b; if (i < 0 || j < 0 || i >= NX || j >= NZ || !act[i * NZ + j]) continue; hgt[i * NZ + j] += amount * Math.exp(-(a * a + b * b) / 2.2); }
 }
 const H_SPLASH = 0.12;
 let puffBudget = 0;
@@ -299,18 +287,21 @@ function simulate(dt, alpha, omega) {
   const damp = Math.exp(-0.42 * dt);
   for (let i = 1; i < NX; i++) { const xf = XMIN + i * DX; for (let j = 0; j < NZ; j++) {
     const z = (j + 0.5) * DZ - W / 2, o = i * NZ + j;
+    if (!act[o] || !act[o - NZ]) { uu[o] = 0; continue; }
     uu[o] = (uu[o] + dt * (-G * (hgt[i * NZ + j] - hgt[(i - 1) * NZ + j]) / DX - alpha * z * 0.017 + omega * omega * xf * 0.02)) * damp; } }
   for (let i = 0; i < NX; i++) { const x = XMIN + (i + 0.5) * DX; for (let j = 1; j < NZ; j++) {
     const zf = j * DZ - W / 2, o = i * (NZ + 1) + j;
+    if (!act[i * NZ + j] || !act[i * NZ + j - 1]) { ww[o] = 0; continue; }
     ww[o] = (ww[o] + dt * (-G * (hgt[i * NZ + j] - hgt[i * NZ + j - 1]) / DZ + alpha * x * 0.017 + omega * omega * zf * 0.02)) * damp; } }
   const fdecay = Math.exp(-0.9 * dt);
   for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
     const o = i * NZ + j;
+    if (!act[o]) { hgt[o] = 0; foam[o] = 0; continue; }
     hgt[o] -= dt * H0 * ((uu[(i + 1) * NZ + j] - uu[o]) / DX + (ww[i * (NZ + 1) + j + 1] - ww[i * (NZ + 1) + j]) / DZ);
     let src = 0;
     if (hgt[o] > H_SPLASH) {
       const ex = hgt[o] - H_SPLASH; hgt[o] = H_SPLASH;
-      const nx = i < 2 ? -1 : i > NX - 3 ? 1 : 0, nz = j < 2 ? -1 : j > NZ - 3 ? 1 : 0;
+      const nx = enx[o], nz = enz[o];
       const ux = (uu[o] + uu[(i + 1) * NZ + j]) * 0.5, wz = (ww[i * (NZ + 1) + j] + ww[i * (NZ + 1) + j + 1]) * 0.5;
       const hitSpeed = Math.max(ux * nx + wz * nz, 0) + Math.sqrt(ex) * 0.9;
       src = 0.55 + hitSpeed;
@@ -320,7 +311,7 @@ function simulate(dt, alpha, omega) {
       }
     } else if (hgt[o] < -0.26) hgt[o] = -0.26;
     const rise = (hgt[o] - hPrev[o]) / dt; hPrev[o] = hgt[o];
-    const nearWall = (i < 4 || j < 3 || i > NX - 5 || j > NZ - 4) ? 1 : 0.25;
+    const nearWall = (enx[o] || enz[o]) ? 1 : 0.25;
     src = Math.max(src, Math.max(rise - 0.55, 0) * 1.1 * nearWall * (hgt[o] > 0.04 ? 1 : 0.3));
     foam[o] = Math.min(Math.max(foam[o] * fdecay, src), 1.2);
   }
@@ -427,7 +418,7 @@ function frame(now) {
 }
 fit();
 requestAnimationFrame(frame);
-window.__pool3d = { ready: true, stats: () => { let mx = 0, n = 0, fm = 0; for (let i = 0; i < hgt.length; i++) { mx = Math.max(mx, Math.abs(hgt[i])); fm = Math.max(fm, foam[i]); } for (let k = 0; k < NP; k++) if (pLife[k] > 0) n++; return { maxH: +mx.toFixed(3), foam: +fm.toFixed(2), puffs: n, sky: waterMat.uniforms.uHasSky.value, nan: hgt.some(v => v !== v) }; }, spin: v => { touched = true; yawVel = v; } };
+window.__pool3d = { ready: true, stats: () => { let mx = 0, n = 0, fm = 0; for (let i = 0; i < hgt.length; i++) { mx = Math.max(mx, Math.abs(hgt[i])); fm = Math.max(fm, foam[i]); } for (let k = 0; k < NP; k++) if (pLife[k] > 0) n++; return { act: act.reduce((a, b) => a + b, 0), cells: NX * NZ, maxH: +mx.toFixed(3), foam: +fm.toFixed(2), puffs: n, sky: waterMat.uniforms.uHasSky.value, nan: hgt.some(v => v !== v) }; }, spin: v => { touched = true; yawVel = v; } };
 </script>
 </body>
 </html>
