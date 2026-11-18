@@ -1665,7 +1665,9 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .marquee__track span { font-style: normal; font-weight: 700; letter-spacing: -.02em; }
 
 /* ---------- p51: planos de forma y medidas ---------- */
-.mcard__plan { float: right; width: 104px; height: auto; margin: 10px 0 8px 12px; border-radius: 6px; }
+.mcard__planos { float: right; display: grid; gap: 7px; width: 108px; margin: 10px 0 8px 12px; }
+.mcard__planos img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.mcard__planos img + img { border-radius: 8px; }
 .mcard__specs { clear: both; }
 .cat__planhint { display: flex; align-items: center; gap: 12px; margin-top: 16px; font-size: 14px; line-height: 1.4; color: var(--muted); }
 .cat__planhint svg { flex: none; width: 44px; height: 26px; fill: #36c5e8; stroke: #0a6a94; stroke-width: 2; }
@@ -1687,5 +1689,5 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
   .modal__media, .modal__body { grid-column: auto; grid-row: auto; }
   .modal__shape-grid { grid-template-columns: 1fr; gap: 10px; }
   .modal__shape-plan { max-width: 340px; margin-inline: auto; }
-  .mcard__plan { width: 112px; }
+  .mcard__planos { width: 120px; }
 }
