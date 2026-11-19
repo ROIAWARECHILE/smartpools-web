@@ -422,5 +422,6 @@ fit();
 requestAnimationFrame(frame);
 window.__pool3d = { ready: true, stats: () => { let mx = 0, n = 0, fm = 0; for (let i = 0; i < hgt.length; i++) { mx = Math.max(mx, Math.abs(hgt[i])); fm = Math.max(fm, foam[i]); } for (let k = 0; k < NP; k++) if (pLife[k] > 0) n++; return { act: act.reduce((a, b) => a + b, 0), cells: NX * NZ, maxH: +mx.toFixed(3), foam: +fm.toFixed(2), puffs: n, sky: waterMat.uniforms.uHasSky.value, nan: hgt.some(v => v !== v) }; }, spin: v => { touched = true; yawVel = v; } };
 </script>
+<script src="/js/medicion.js?v=1" defer></script>
 </body>
 </html>
