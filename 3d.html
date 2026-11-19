@@ -46,7 +46,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // ---- medidas y contorno del modelo: los genera Blender junto con el casco (assets/3d/<modelo>.json) ----
 const SLUG_OK = (new URLSearchParams(location.search).get('m') || 'praia').toLowerCase().replace(/[^a-z-]/g, '');
 let CFG;
-try { const r = await fetch('assets/3d/' + SLUG_OK + '.json'); if (!r.ok) throw new Error(r.status); CFG = await r.json(); }
+try { const r = await fetch('assets/3d/' + SLUG_OK + '.json?v=3'); if (!r.ok) throw new Error(r.status); CFG = await r.json(); }
 catch (e) { document.getElementById('fail').style.display = 'grid'; throw e; }
 if (new URLSearchParams(location.search).get('e')) document.documentElement.classList.add('is-embed');
 const L = CFG.L, W = CFG.W;
@@ -126,7 +126,7 @@ shellMat.onBeforeCompile = sh => {
       totalEmissiveRadiance += vec3(0.55, 0.85, 1.0) * c * 0.2 * floorMask;
     }`);
 };
-new GLTFLoader().load('assets/3d/' + SLUG_OK + '.glb', g => {
+new GLTFLoader().load('assets/3d/' + SLUG_OK + '.glb?v=3', g => {
   g.scene.traverse(o => {
     if (!o.isMesh) return;
     const n = (o.name + ' ' + (o.parent ? o.parent.name : '')).toLowerCase(); o.frustumCulled = false;

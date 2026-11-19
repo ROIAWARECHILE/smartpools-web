@@ -1721,3 +1721,9 @@ html:has(.nav--hidden) .cat .cat__filter { top: 12px; }
 .mcard__img { position: relative; }
 .mcard__fade { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .85s ease; }
 .mcard__fade.is-in { opacity: 1; }
+
+/* ---------- p61: enlaces a las páginas de cada modelo en el pie ---------- */
+.footer__models { display: flex; flex-wrap: wrap; gap: 4px 20px; padding-top: 34px; font-size: 13px; }
+.footer__models a { color: rgba(255, 255, 255, .62); text-decoration: none; min-height: 24px; display: inline-flex; align-items: center; }
+.footer__models a b { color: var(--white); font-weight: 600; }
+.footer__models a:hover { color: var(--white); }
